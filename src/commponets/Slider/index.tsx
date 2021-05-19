@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useContext, useRef, useState } from "react";
 import styles from "./index.module.scss";
+import { ContextData } from "../../globalState";
 
 interface IProps {
   text?: string; // 文本
-  onChange?: (rate: number) => void; // 数值改变
+  onChange?: (val: number) => void; // 数值改变
+  value?: number; // 数值
 }
 interface ICanvasOpt {
   canvasDom: HTMLElement | null;
@@ -20,14 +22,24 @@ const initCanvasOpt: ICanvasOpt = {
 };
 
 function Slider(props: IProps): JSX.Element {
-  const { onChange, text } = props;
+  const { onChange, text, value } = props;
   const canvasRef = useRef<any>(null);
   const [canvasOpt, setCanvasOpt] = useState<ICanvasOpt>(initCanvasOpt);
-  const [rate, setRate] = useState<number>(0);
+
+  const { state } = useContext(ContextData);
 
   useEffect(() => {
     initCanvas();
   }, []);
+
+  useEffect(() => {
+    if (state.drawType === "reset") {
+      const { ctx, canvasW, canvasH } = canvasOpt;
+      ctx.clearRect(0, 0, canvasW, canvasH);
+      drawLine(ctx, canvasW);
+      drawArc(ctx);
+    }
+  }, [state.drawType]);
 
   // 当canvas的dom获取时渲染
   useEffect(() => {
@@ -41,13 +53,6 @@ function Slider(props: IProps): JSX.Element {
     drawLine(ctx, canvasW);
     drawArc(ctx);
   }, [canvasOpt]);
-
-  useEffect(() => {
-    if (!canvasRef.current) {
-      return;
-    }
-    onChange && onChange(rate);
-  }, [rate]);
 
   //   初始化canvas的配置数据
   const initCanvas = () => {
@@ -89,16 +94,19 @@ function Slider(props: IProps): JSX.Element {
     let positionX = e.pageX - x;
     let xMax = canvasW - 5; // 能移动的最大距离
     let xMin = 5; // 能移动的最小距离(半径)
-    setRate(parseInt((((positionX - xMin) / (xMax - xMin)) * 100).toFixed(2)));
     // 鼠标点击大于圆的半径
     if (positionX >= xMax) {
       positionX = xMax;
-      setRate(100);
-    }
-    // 鼠标点击小于圆的半径
-    if (positionX <= xMin) {
+      onChange && onChange(100);
+    } else if (positionX <= xMin) {
+      // 鼠标点击小于圆的半径
       positionX = xMin;
-      setRate(0);
+      onChange && onChange(0);
+    } else {
+      let num = parseInt(
+        (((positionX - xMin) / (xMax - xMin)) * 100).toFixed(2)
+      );
+      onChange && onChange(num);
     }
 
     ctx.clearRect(0, 0, canvasW, canvasH);
@@ -110,15 +118,15 @@ function Slider(props: IProps): JSX.Element {
   };
 
   return (
-    <div className={styles.sliderCanvas_wrap} title={rate.toString()}>
+    <div className={styles.sliderCanvas_wrap}>
       {text ? text : ""}
       <canvas
         ref={canvasRef}
-        id="sliderCanvas"
-        width="100px"
-        height="10px"
+        className={styles.sliderCanvas}
+        width="100"
+        height="10"
       ></canvas>
-      <span className={styles.rate_text}>{rate}</span>
+      <span className={styles.rate_text}>{value}</span>
     </div>
   );
 }

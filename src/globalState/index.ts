@@ -3,8 +3,14 @@ import { createContext } from "react";
 //初始数据
 const initData = {
     drawType: null,  // 绘制图案的类型
-    fillColor: '#000',
-    strokeColor: '#000',
+    fillColor: '#000',  // 填充颜色
+    strokeColor: '#000', // 线框颜色
+    lineW: 0,   // 线宽
+    lineType: 'solid', // 线的类型
+    shadowBlur: 0, // 阴影模糊半径
+    shadowOffsetX: 0, // 阴影X轴偏移量
+    shadowOffsetY: 0, // 阴影Y轴偏移量
+    shadowColor: '#000', // 阴影颜色
 };
 
 // 派发事件

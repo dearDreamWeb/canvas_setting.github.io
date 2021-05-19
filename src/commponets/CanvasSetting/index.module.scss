@@ -11,17 +11,34 @@
     &:focus {
       box-shadow: 0 0 5px 1px #d1d1d1;
     }
-    &::placeholder {
-    //   font-size: 14px;
+  }
+  .title_wrap {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    .setting_title {
+      margin-right: 20px;
+      font-size: 25px;
+    }
+    .reset_btn {
+      font-family: "diyFont";
+      font-size: 16px;
+      cursor: pointer;
     }
   }
-  .setting_title {
-    margin-bottom: 20px;
-    font-size: 25px;
-  }
+
   .setting_main {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto;
+    grid-row-gap: 20px;
+    .select_diy {
+      height: 100%;
+      width: 150px;
+      border: 1px solid #ccc;
+      outline: none;
+      font-size: 16px;
+      font-family: "diyFont";
+    }
   }
 }

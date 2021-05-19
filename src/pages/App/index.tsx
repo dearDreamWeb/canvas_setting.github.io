@@ -2,6 +2,7 @@ import React, { useEffect, useReducer } from "react";
 import styles from "./index.module.scss";
 import Slider from "../../commponets/Slider";
 import CanvasSetting from "../../commponets/CanvasSetting";
+import ShowPattern from "../../commponets/ShowPattern";
 import { reducer, ContextData, initData } from "../../globalState"; //引入useReducer文件
 
 const menuList = [
@@ -15,7 +16,15 @@ const menuList = [
   },
   {
     key: "2",
+    text: "绘制直线",
+  },
+  {
+    key: "3",
     text: "绘制圆形",
+  },
+  {
+    key: "4",
+    text: "绘制文本",
   },
 ];
 
@@ -58,12 +67,7 @@ function App(): JSX.Element {
             <CanvasSetting />
           </div>
           <div className={styles.canvas_wrap}>
-            <canvas
-              id="canvas"
-              className={styles.canvas}
-              width="1600px"
-              height="600px"
-            ></canvas>
+            <ShowPattern />
           </div>
         </section>
       </div>
