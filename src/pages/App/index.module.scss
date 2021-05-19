@@ -1,0 +1,57 @@
+@font-face {
+  font-family: "diyFont";
+  src: url("../../assets/font/diyFont.ttf");
+}
+.app {
+  display: flex;
+  // background-color: #f6f6f6;
+  font-family: diyFont;
+  .app_left {
+    flex-basis: 250px;
+    min-height: 100vh;
+    border: 1px solid #ccc;
+    font-size: 18px;
+    .left_title {
+      text-align: center;
+      line-height: 100px;
+      height: 100px;
+      font-size: 25px;
+      background-color: #ffffff;
+      box-shadow: inset 0 0 0px 20px #0a0a0a;
+    }
+    .menu_list {
+      margin-top: 20px;
+      .menu_item {
+        margin-bottom: 5px;
+        padding: 10px 1px;
+        text-align: center;
+        background-color: #e8e8e8;
+        cursor: pointer;
+        &:hover,
+        &.menu_item_acitve {
+          background-color: #3c3c3c;
+          color: #fff;
+        }
+      }
+    }
+  }
+  .app_right {
+    flex-grow: 1;
+    .canvas_settings {
+      width: 100%;
+      height: 30vh;
+      border-bottom: 1px solid #ccc;
+    }
+    .canvas_wrap {
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+      width: 100%;
+      height: 70vh;
+      background-color: #a2a2a2;
+      .canvas {
+        // box-shadow: 0 0 0px 10px #a2a2a2;
+      }
+    }
+  }
+}

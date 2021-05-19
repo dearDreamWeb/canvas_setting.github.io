@@ -1,0 +1,27 @@
+.setting_wrap {
+  padding: 20px;
+  font-size: 18px;
+  input {
+    font-family: diyFont;
+    width: 150px;
+    padding: 5px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    outline: none;
+    &:focus {
+      box-shadow: 0 0 5px 1px #d1d1d1;
+    }
+    &::placeholder {
+    //   font-size: 14px;
+    }
+  }
+  .setting_title {
+    margin-bottom: 20px;
+    font-size: 25px;
+  }
+  .setting_main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+}

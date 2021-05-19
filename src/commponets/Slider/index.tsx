@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import "./index.scss";
+import styles from "./index.module.scss";
 
-interface IProps {}
+interface IProps {
+  text?: string; // 文本
+  onChange?: (rate: number) => void; // 数值改变
+}
 interface ICanvasOpt {
   canvasDom: HTMLElement | null;
   ctx: any;
@@ -16,7 +19,8 @@ const initCanvasOpt: ICanvasOpt = {
   canvasH: 0,
 };
 
-function Slider(): JSX.Element {
+function Slider(props: IProps): JSX.Element {
+  const { onChange, text } = props;
   const canvasRef = useRef<any>(null);
   const [canvasOpt, setCanvasOpt] = useState<ICanvasOpt>(initCanvasOpt);
   const [rate, setRate] = useState<number>(0);
@@ -25,6 +29,7 @@ function Slider(): JSX.Element {
     initCanvas();
   }, []);
 
+  // 当canvas的dom获取时渲染
   useEffect(() => {
     const { ctx, canvasW, canvasH, canvasDom } = canvasOpt;
     if (!canvasDom) {
@@ -36,6 +41,13 @@ function Slider(): JSX.Element {
     drawLine(ctx, canvasW);
     drawArc(ctx);
   }, [canvasOpt]);
+
+  useEffect(() => {
+    if (!canvasRef.current) {
+      return;
+    }
+    onChange && onChange(rate);
+  }, [rate]);
 
   //   初始化canvas的配置数据
   const initCanvas = () => {
@@ -75,16 +87,17 @@ function Slider(): JSX.Element {
     const { ctx, canvasW, canvasH, canvasDom } = canvasOpt;
     const { x } = canvasDom!.getBoundingClientRect();
     let positionX = e.pageX - x;
-
-    setRate(parseInt(((positionX / canvasW) * 100).toFixed(2)));
+    let xMax = canvasW - 5; // 能移动的最大距离
+    let xMin = 5; // 能移动的最小距离(半径)
+    setRate(parseInt((((positionX - xMin) / (xMax - xMin)) * 100).toFixed(2)));
     // 鼠标点击大于圆的半径
-    if (positionX >= canvasW - 5) {
-      positionX = canvasW - 5;
+    if (positionX >= xMax) {
+      positionX = xMax;
       setRate(100);
     }
     // 鼠标点击小于圆的半径
-    if (positionX <= 5) {
-      positionX = 5;
+    if (positionX <= xMin) {
+      positionX = xMin;
       setRate(0);
     }
 
@@ -97,13 +110,15 @@ function Slider(): JSX.Element {
   };
 
   return (
-    <div className="sliderCanvas_wrap" title={rate.toString()}>
+    <div className={styles.sliderCanvas_wrap} title={rate.toString()}>
+      {text ? text : ""}
       <canvas
         ref={canvasRef}
         id="sliderCanvas"
         width="100px"
         height="10px"
       ></canvas>
+      <span className={styles.rate_text}>{rate}</span>
     </div>
   );
 }
