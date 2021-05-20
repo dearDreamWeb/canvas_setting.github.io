@@ -110,6 +110,19 @@ function ShowPattern(): JSX.Element {
           shadowColor
         );
         break;
+      case "5":
+        drawDuola(
+          ctx,
+          fillColor,
+          strokeColor,
+          lineW,
+          lineType,
+          shadowBlur,
+          shadowOffsetX,
+          shadowOffsetY,
+          shadowColor
+        );
+        break;
     }
   }, [state]);
 
@@ -359,6 +372,166 @@ function ShowPattern(): JSX.Element {
 
     ctx.closePath();
     ctx.fill();
+    ctx.stroke();
+  };
+
+  /**
+   * 绘制哆啦A梦
+   * @param ctx
+   * @param fillColor
+   * @param strokeColor
+   * @param lineW
+   * @param lineType
+   * @param shadowBlur
+   * @param shadowOffsetX
+   * @param shadowOffsetY
+   * @param shadowColor
+   */
+  const drawDuola = (
+    ctx,
+    fillColor,
+    strokeColor,
+    lineW,
+    lineType,
+    shadowBlur,
+    shadowOffsetX,
+    shadowOffsetY,
+    shadowColor
+  ) => {
+    ctx.beginPath();
+
+    // ctx.fillStyle = fillColor;
+    // ctx.strokeStyle = strokeColor;
+
+    // lineWidth明明是设置线宽，最小只能到1
+    // ctx.lineWidth = lineW === 0 ? 1 : lineW;
+
+    // 实线和虚线切换
+    // if (lineType === "dash") {
+    //   ctx.setLineDash([3]); // [实线长度, 间隙长度]
+    //   ctx.lineDashOffset = 0;
+    // } else {
+    //   ctx.setLineDash([]);
+    // }
+
+    // 绘制阴影
+    // ctx.shadowColor = shadowColor;
+    // ctx.shadowBlur = shadowBlur;
+    // ctx.shadowOffsetX = shadowOffsetX;
+    // ctx.shadowOffsetY = shadowOffsetY;
+
+    // 绘制文本
+    // ctx.font = "30px sans-serif";
+    // ctx.fillText("Canvas实验室", 100, 100);
+
+    // ctx.closePath();
+    // ctx.fill();
+    ctx.stroke();
+
+    ctx.lineWidth = 3;
+    // 蓝脸
+    ctx.beginPath();
+    ctx.arc(400, 160, 150, Math.PI * 0.8, Math.PI * 2.2);
+    ctx.fillStyle = "#00a0de";
+    ctx.fill();
+    ctx.closePath();
+    ctx.stroke();
+
+    // 白脸
+    ctx.beginPath();
+    ctx.arc(400, 184, 110, Math.PI * 0.8, Math.PI * 2.2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.closePath();
+    ctx.stroke();
+
+    // 左眼
+    ctx.beginPath();
+    ctx.ellipse(372, 80, 40, 30, Math.PI * 0.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.closePath();
+    ctx.stroke();
+
+    // 右眼
+    ctx.beginPath();
+    ctx.ellipse(432, 80, 40, 30, Math.PI * 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.closePath();
+    ctx.stroke();
+
+    // 左眼球
+    ctx.beginPath();
+    ctx.arc(380, 90, 14, 0, Math.PI * 2);
+    ctx.fillStyle = "#000";
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(385, 95, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.closePath();
+    ctx.stroke();
+
+    // 右眼球
+    ctx.beginPath();
+    ctx.lineWidth= 5;
+    ctx.arc(428, 100, 14, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.stroke();
+    ctx.lineWidth = 3;
+
+    // 鼻子
+    ctx.beginPath();
+    ctx.arc(402, 128, 18, 0, Math.PI * 2);
+    ctx.fillStyle = "#e70010";
+    ctx.fill();
+    ctx.closePath();
+    ctx.stroke();
+
+    // 脸中线
+    ctx.beginPath();
+    ctx.moveTo(402, 150);
+    ctx.lineTo(402, 220);
+    ctx.closePath();
+    ctx.stroke();
+
+    // 嘴
+    ctx.beginPath();
+    ctx.arc(402, 135, 100, Math.PI * 0.2, Math.PI * 0.8);
+    ctx.stroke();
+
+    // 左侧胡须
+    ctx.beginPath();
+    ctx.moveTo(310, 145);
+    ctx.lineTo(370, 155);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(310, 165);
+    ctx.lineTo(370, 165);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(310, 185);
+    ctx.lineTo(370, 175);
+    ctx.stroke();
+
+    // 右侧侧胡须
+    ctx.beginPath();
+    ctx.moveTo(434, 155);
+    ctx.lineTo(494, 145);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(434, 165);
+    ctx.lineTo(494, 165);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(434, 175);
+    ctx.lineTo(494, 185);
     ctx.stroke();
   };
 

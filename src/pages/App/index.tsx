@@ -26,6 +26,10 @@ const menuList = [
     key: "4",
     text: "绘制文本",
   },
+  {
+    key: "5",
+    text: "绘制哆啦A梦",
+  },
 ];
 
 function App(): JSX.Element {
