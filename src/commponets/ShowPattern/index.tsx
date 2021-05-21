@@ -6,6 +6,9 @@ function ShowPattern(): JSX.Element {
   const canvasWrapRef = useRef<any>(null);
   const canvasRef = useRef<any>(null);
 
+  // 眼睛的位置
+  const eyePosition = { eyeBallX: 480, eyeBallY: 230 };
+
   const { state, dispatch } = useContext(ContextData);
 
   //   初始化将canvas的宽高和父元素的一样
@@ -37,8 +40,7 @@ function ShowPattern(): JSX.Element {
       shadowColor,
     } = state;
     ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-
-    // console.log(drawType, fillColor, strokeColor, lineW, lineType);
+    canvasDom.removeEventListener("mousemove", eyeBallMove);
 
     switch (drawType) {
       case "reset":
@@ -111,7 +113,9 @@ function ShowPattern(): JSX.Element {
         );
         break;
       case "5":
-        drawDuola(ctx);
+        canvasDom.removeEventListener("mousemove", eyeBallMove);
+        canvasDom.addEventListener("mousemove", eyeBallMove);
+        drawDuola(ctx, eyePosition.eyeBallX, eyePosition.eyeBallY);
         break;
     }
   }, [state]);
@@ -365,6 +369,70 @@ function ShowPattern(): JSX.Element {
     ctx.stroke();
   };
 
+  let timer;
+  const eyeBallMove = e => {
+    const newEyePosition = { ...eyePosition };
+    timer && clearTimeout(timer);
+    timer = setTimeout(() => {
+      const { x, y } = canvasRef.current.getBoundingClientRect();
+      const moveX = e.clientX - x;
+      const moveY = e.clientY - y;
+      const minX = 472 - 30 + 14 + 5;  // x轴最小值
+      const maxX = 472 + 30 - 14 - 5;  // x轴最大值
+      const minY = 220 - 40 + 14 + 5;  // y轴最小值
+      const maxY = 220 + 40 - 14 - 5;  // y轴最大值
+      // 勾股定理求距离
+      const distance = Math.sqrt(
+        Math.pow(moveX - newEyePosition.eyeBallX, 2) +
+          Math.pow(moveY - newEyePosition.eyeBallY, 2)
+      );
+      // 定时器的速度
+      const timeSpeed = 30;
+      // 眼球移动的速度
+      const eyeBallSpeed = 5;
+      // 边界计算
+      let count = 0;
+      // 总时间
+      let distanceTime = distance / eyeBallSpeed;
+      // x轴的速度
+      let eyeBallSpeedX = (moveX - newEyePosition.eyeBallX) / distanceTime;
+      // y轴的速度
+      let eyeBallSpeedY = (moveY - newEyePosition.eyeBallY) / distanceTime;
+
+      let _timer;
+      clearInterval(_timer);
+      _timer = setInterval(() => {
+        const { eyeBallX, eyeBallY } = newEyePosition;
+        // 如果边界计算超过2说明x轴和y轴都已到达边界
+        if (count >= 2) {
+          clearInterval(_timer);
+        }
+
+        let ctx = canvasRef.current.getContext("2d");
+
+        newEyePosition.eyeBallX += eyeBallSpeedX;
+        newEyePosition.eyeBallY += eyeBallSpeedY;
+
+        if (eyeBallX >= maxX) {
+          newEyePosition.eyeBallX = maxX;
+          count++;
+        } else if (eyeBallX <= minX) {
+          newEyePosition.eyeBallX = minX;
+          count++;
+        }
+
+        if (eyeBallY >= maxY) {
+          newEyePosition.eyeBallY = maxY;
+          count++;
+        } else if (eyeBallY <= minY) {
+          newEyePosition.eyeBallY = minY;
+          count++;
+        }
+        drawDuola(ctx, newEyePosition.eyeBallX, newEyePosition.eyeBallY);
+      }, timeSpeed);
+    }, 100);
+  };
+
   /**
    * 绘制哆啦A梦
    * @param ctx
@@ -377,14 +445,15 @@ function ShowPattern(): JSX.Element {
    * @param shadowOffsetY
    * @param shadowColor
    */
-  const drawDuola = async ctx => {
+  const drawDuola = (ctx, eyeBallX, eyeBallY) => {
+    ctx.clearRect(0, 0, canvasRef.current.wdith, canvasRef.current.height);
     // 绘制阴影
     ctx.shadowColor = "rgba(0,0,0,0)";
 
     ctx.lineWidth = 3;
     // 蓝脸
     ctx.beginPath();
-    ctx.arc(400, 160, 150, Math.PI * 0.8, Math.PI * 2.2);
+    ctx.arc(500, 300, 150, Math.PI * 0.8, Math.PI * 2.2);
     ctx.fillStyle = "#00a0de";
     ctx.fill();
     ctx.closePath();
@@ -392,7 +461,7 @@ function ShowPattern(): JSX.Element {
 
     // 白脸
     ctx.beginPath();
-    ctx.arc(400, 184, 110, Math.PI * 0.8, Math.PI * 2.2);
+    ctx.arc(500, 324, 110, Math.PI * 0.8, Math.PI * 2.2);
     ctx.fillStyle = "#fff";
     ctx.fill();
     ctx.closePath();
@@ -400,7 +469,7 @@ function ShowPattern(): JSX.Element {
 
     // 左眼
     ctx.beginPath();
-    ctx.ellipse(372, 80, 40, 30, Math.PI * 0.5, 0, Math.PI * 2);
+    ctx.ellipse(472, 220, 40, 30, Math.PI * 0.5, 0, Math.PI * 2);
     ctx.fillStyle = "#fff";
     ctx.fill();
     ctx.closePath();
@@ -408,7 +477,7 @@ function ShowPattern(): JSX.Element {
 
     // 右眼
     ctx.beginPath();
-    ctx.ellipse(432, 80, 40, 30, Math.PI * 2.5, 0, Math.PI * 2);
+    ctx.ellipse(532, 220, 40, 30, Math.PI * 2.5, 0, Math.PI * 2);
     ctx.fillStyle = "#fff";
     ctx.fill();
     ctx.closePath();
@@ -416,13 +485,13 @@ function ShowPattern(): JSX.Element {
 
     // 左眼球
     ctx.beginPath();
-    ctx.arc(380, 90, 14, 0, Math.PI * 2);
+    ctx.arc(eyeBallX, eyeBallY, 14, 0, Math.PI * 2);
     ctx.fillStyle = "#000";
     ctx.fill();
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.arc(385, 95, 5, 0, Math.PI * 2);
+    ctx.arc(eyeBallX + 5, eyeBallY + 5, 5, 0, Math.PI * 2);
     ctx.fillStyle = "#fff";
     ctx.fill();
     ctx.closePath();
@@ -431,13 +500,13 @@ function ShowPattern(): JSX.Element {
     // 右眼球
     ctx.beginPath();
     ctx.lineWidth = 5;
-    ctx.arc(428, 100, 14, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.arc(528, 240, 14, Math.PI * 1.1, Math.PI * 1.9);
     ctx.stroke();
     ctx.lineWidth = 3;
 
     // 鼻子
     ctx.beginPath();
-    ctx.arc(402, 128, 18, 0, Math.PI * 2);
+    ctx.arc(502, 265, 18, 0, Math.PI * 2);
     ctx.fillStyle = "#e70010";
     ctx.fill();
     ctx.closePath();
@@ -445,56 +514,57 @@ function ShowPattern(): JSX.Element {
 
     // 脸中线
     ctx.beginPath();
-    ctx.moveTo(402, 150);
-    ctx.lineTo(402, 220);
+    ctx.moveTo(502, 287);
+    ctx.lineTo(502, 366);
     ctx.closePath();
     ctx.stroke();
 
     // 嘴
     ctx.beginPath();
-    ctx.arc(402, 135, 100, Math.PI * 0.2, Math.PI * 0.8);
+    ctx.arc(502, 280, 100, Math.PI * 0.2, Math.PI * 0.8);
     ctx.stroke();
 
     // 左侧胡须
     ctx.beginPath();
-    ctx.moveTo(310, 145);
-    ctx.lineTo(370, 155);
+    ctx.moveTo(420, 285);
+    ctx.lineTo(480, 295);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(310, 165);
-    ctx.lineTo(370, 165);
+    ctx.moveTo(420, 305);
+    ctx.lineTo(480, 305);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(310, 185);
-    ctx.lineTo(370, 175);
+    ctx.moveTo(420, 325);
+    ctx.lineTo(480, 315);
     ctx.stroke();
 
     // 右侧侧胡须
     ctx.beginPath();
-    ctx.moveTo(434, 155);
-    ctx.lineTo(494, 145);
+    ctx.moveTo(524, 295);
+    ctx.lineTo(584, 285);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(434, 165);
-    ctx.lineTo(494, 165);
+    ctx.moveTo(524, 305);
+    ctx.lineTo(584, 305);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(434, 175);
-    ctx.lineTo(494, 185);
+    ctx.moveTo(524, 315);
+    ctx.lineTo(584, 325);
     ctx.stroke();
 
+    // 脖子
     ctx.beginPath();
     ctx.lineCap = "round";
     ctx.lineWidth = 1;
     ctx.fillStyle = "#e70010";
-    ctx.moveTo(270, 249);
-    ctx.lineTo(530, 249);
-    ctx.lineTo(530, 265);
-    ctx.lineTo(270, 265);
+    ctx.moveTo(370, 389);
+    ctx.lineTo(630, 389);
+    ctx.lineTo(630, 405);
+    ctx.lineTo(370, 405);
     ctx.fill();
     ctx.closePath();
     ctx.stroke();
