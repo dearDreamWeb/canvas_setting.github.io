@@ -111,17 +111,7 @@ function ShowPattern(): JSX.Element {
         );
         break;
       case "5":
-        drawDuola(
-          ctx,
-          fillColor,
-          strokeColor,
-          lineW,
-          lineType,
-          shadowBlur,
-          shadowOffsetX,
-          shadowOffsetY,
-          shadowColor
-        );
+        drawDuola(ctx);
         break;
     }
   }, [state]);
@@ -387,46 +377,9 @@ function ShowPattern(): JSX.Element {
    * @param shadowOffsetY
    * @param shadowColor
    */
-  const drawDuola = (
-    ctx,
-    fillColor,
-    strokeColor,
-    lineW,
-    lineType,
-    shadowBlur,
-    shadowOffsetX,
-    shadowOffsetY,
-    shadowColor
-  ) => {
-    ctx.beginPath();
-
-    // ctx.fillStyle = fillColor;
-    // ctx.strokeStyle = strokeColor;
-
-    // lineWidth明明是设置线宽，最小只能到1
-    // ctx.lineWidth = lineW === 0 ? 1 : lineW;
-
-    // 实线和虚线切换
-    // if (lineType === "dash") {
-    //   ctx.setLineDash([3]); // [实线长度, 间隙长度]
-    //   ctx.lineDashOffset = 0;
-    // } else {
-    //   ctx.setLineDash([]);
-    // }
-
+  const drawDuola = async ctx => {
     // 绘制阴影
-    // ctx.shadowColor = shadowColor;
-    // ctx.shadowBlur = shadowBlur;
-    // ctx.shadowOffsetX = shadowOffsetX;
-    // ctx.shadowOffsetY = shadowOffsetY;
-
-    // 绘制文本
-    // ctx.font = "30px sans-serif";
-    // ctx.fillText("Canvas实验室", 100, 100);
-
-    // ctx.closePath();
-    // ctx.fill();
-    ctx.stroke();
+    ctx.shadowColor = "rgba(0,0,0,0)";
 
     ctx.lineWidth = 3;
     // 蓝脸
@@ -477,7 +430,7 @@ function ShowPattern(): JSX.Element {
 
     // 右眼球
     ctx.beginPath();
-    ctx.lineWidth= 5;
+    ctx.lineWidth = 5;
     ctx.arc(428, 100, 14, Math.PI * 1.1, Math.PI * 1.9);
     ctx.stroke();
     ctx.lineWidth = 3;
@@ -532,6 +485,18 @@ function ShowPattern(): JSX.Element {
     ctx.beginPath();
     ctx.moveTo(434, 175);
     ctx.lineTo(494, 185);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.lineCap = "round";
+    ctx.lineWidth = 1;
+    ctx.fillStyle = "#e70010";
+    ctx.moveTo(270, 249);
+    ctx.lineTo(530, 249);
+    ctx.lineTo(530, 265);
+    ctx.lineTo(270, 265);
+    ctx.fill();
+    ctx.closePath();
     ctx.stroke();
   };
 
