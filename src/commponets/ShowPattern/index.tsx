@@ -40,8 +40,9 @@ function ShowPattern(): JSX.Element {
       shadowColor,
     } = state;
     ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-    canvasDom.removeEventListener("mousemove", eyeBallMove);
-
+    canvasDom.addEventListener("mouseleave", () => {
+      canvasDom.removeEventListener("mousemove", eyeBallMove);
+    });
     switch (drawType) {
       case "reset":
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
@@ -371,16 +372,17 @@ function ShowPattern(): JSX.Element {
 
   let timer;
   const eyeBallMove = e => {
+    console.log(1);
     const newEyePosition = { ...eyePosition };
     timer && clearTimeout(timer);
     timer = setTimeout(() => {
       const { x, y } = canvasRef.current.getBoundingClientRect();
       const moveX = e.clientX - x;
       const moveY = e.clientY - y;
-      const minX = 472 - 30 + 14 + 5;  // x轴最小值
-      const maxX = 472 + 30 - 14 - 5;  // x轴最大值
-      const minY = 220 - 40 + 14 + 5;  // y轴最小值
-      const maxY = 220 + 40 - 14 - 5;  // y轴最大值
+      const minX = 472 - 30 + 14 + 5; // x轴最小值
+      const maxX = 472 + 30 - 14 - 5; // x轴最大值
+      const minY = 220 - 40 + 14 + 5; // y轴最小值
+      const maxY = 220 + 40 - 14 - 5; // y轴最大值
       // 勾股定理求距离
       const distance = Math.sqrt(
         Math.pow(moveX - newEyePosition.eyeBallX, 2) +
