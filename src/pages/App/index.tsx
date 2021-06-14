@@ -30,6 +30,14 @@ const menuList = [
     key: "5",
     text: "绘制哆啦A梦",
   },
+  {
+    key: "6",
+    text: "webgl绘制点",
+  },
+  {
+    key: "7",
+    text: "webgl点击绘制点",
+  },
 ];
 
 function App(): JSX.Element {

@@ -1,10 +1,12 @@
-import React, { useRef, useEffect, useContext } from "react";
+import React, { useRef, useEffect, useContext, useState } from "react";
 import styles from "./index.module.scss";
 import { ContextData } from "../../globalState";
 
 function ShowPattern(): JSX.Element {
   const canvasWrapRef = useRef<any>(null);
   const canvasRef = useRef<any>(null);
+  const webglRef = useRef<any>(null);
+  const [showCanvas, setShowCanvas] = useState(true);
 
   // 眼睛的位置
   const eyePosition = { eyeBallX: 480, eyeBallY: 230 };
@@ -19,6 +21,8 @@ function ShowPattern(): JSX.Element {
     const { width, height } = canvasWrapRef.current.getBoundingClientRect();
     canvasRef.current.width = width;
     canvasRef.current.height = height;
+    webglRef.current.width = width;
+    webglRef.current.height = height;
   }, []);
 
   //   canvas配置改变时绘图
@@ -43,6 +47,7 @@ function ShowPattern(): JSX.Element {
     canvasDom.addEventListener("mouseleave", () => {
       canvasDom.removeEventListener("mousemove", eyeBallMove);
     });
+    setShowCanvas(true)
     switch (drawType) {
       case "reset":
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
@@ -118,8 +123,17 @@ function ShowPattern(): JSX.Element {
         canvasDom.addEventListener("mousemove", eyeBallMove);
         drawDuola(ctx, eyePosition.eyeBallX, eyePosition.eyeBallY);
         break;
+      case '6':
+        setShowCanvas(false);
+        break;
     }
   }, [state]);
+
+  useEffect(() => {
+    if (!showCanvas) {
+      webglDraw()
+    }
+  }, [showCanvas])
 
   /**
    * 绘制矩形
@@ -386,7 +400,7 @@ function ShowPattern(): JSX.Element {
       // 勾股定理求距离
       const distance = Math.sqrt(
         Math.pow(moveX - newEyePosition.eyeBallX, 2) +
-          Math.pow(moveY - newEyePosition.eyeBallY, 2)
+        Math.pow(moveY - newEyePosition.eyeBallY, 2)
       );
       // 定时器的速度
       const timeSpeed = 30;
@@ -572,9 +586,48 @@ function ShowPattern(): JSX.Element {
     ctx.stroke();
   };
 
+  /**
+   * webgl绘制点
+   */
+  const webglDraw = () => {
+    const webgl = webglRef.current;
+    const gl = webgl.getContext('webgl');
+
+    const vs = `
+        void main(){
+            gl_Position  = vec4(0,0,1.0,1.0);
+            gl_PointSize  = 40.0;
+        }
+    `
+    const fs = `
+        void main(){
+            gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+        }
+    `
+    const vsShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vsShader, vs);
+    gl.compileShader(vsShader);
+    let success = gl.getShaderParameter(vsShader, gl.COMPILE_STATUS);
+
+    const fsShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fsShader, fs);
+    gl.compileShader(fsShader);
+    let success1 = gl.getShaderParameter(fsShader, gl.COMPILE_STATUS);
+
+
+    const program = gl.createProgram();
+    gl.attachShader(program, vsShader);
+    gl.attachShader(program, fsShader);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    gl.drawArrays(gl.POINTS, 0, 1);
+  }
+
   return (
     <div ref={canvasWrapRef} className={styles.showPattern_wrap}>
       <canvas ref={canvasRef}></canvas>
+      <canvas ref={webglRef} className={styles.webgl_canvas} style={{ display: showCanvas ? 'none' : 'block' }}></canvas>
     </div>
   );
 }
