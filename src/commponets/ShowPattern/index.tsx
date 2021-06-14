@@ -8,6 +8,8 @@ function ShowPattern(): JSX.Element {
   const webglRef = useRef<any>(null);
   const [showCanvas, setShowCanvas] = useState(true);
 
+  let pointsArr: number[] = [];
+
   // 眼睛的位置
   const eyePosition = { eyeBallX: 480, eyeBallY: 230 };
 
@@ -47,6 +49,7 @@ function ShowPattern(): JSX.Element {
     canvasDom.addEventListener("mouseleave", () => {
       canvasDom.removeEventListener("mousemove", eyeBallMove);
     });
+    webglRef.current.onclick = null;
     setShowCanvas(true)
     switch (drawType) {
       case "reset":
@@ -123,17 +126,33 @@ function ShowPattern(): JSX.Element {
         canvasDom.addEventListener("mousemove", eyeBallMove);
         drawDuola(ctx, eyePosition.eyeBallX, eyePosition.eyeBallY);
         break;
-      case '6':
+      default:
+        pointsArr = []
         setShowCanvas(false);
         break;
     }
   }, [state]);
 
   useEffect(() => {
+
+    const { drawType } = state;
     if (!showCanvas) {
-      webglDraw()
+      const webgl = webglRef.current;
+      const gl = webgl.getContext('webgl');
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      switch (drawType) {
+        case '6':
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          webglDraw(gl)
+          break;
+        case '7':
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          webglRef.current.onclick = null;
+          webglRef.current.onclick = (e) => webglClickDraw(e, gl)
+          break;
+      }
     }
-  }, [showCanvas])
+  }, [showCanvas, state.drawType])
 
   /**
    * 绘制矩形
@@ -589,13 +608,10 @@ function ShowPattern(): JSX.Element {
   /**
    * webgl绘制点
    */
-  const webglDraw = () => {
-    const webgl = webglRef.current;
-    const gl = webgl.getContext('webgl');
-
+  const webglDraw = (gl) => {
     const vs = `
         void main(){
-            gl_Position  = vec4(0,0,1.0,1.0);
+            gl_Position  = vec4(0.0,0.0,1.0,1.0);
             gl_PointSize  = 40.0;
         }
     `
@@ -622,6 +638,60 @@ function ShowPattern(): JSX.Element {
     gl.useProgram(program);
 
     gl.drawArrays(gl.POINTS, 0, 1);
+  }
+
+
+  /**
+   * 点击绘制点
+   */
+  const webglClickDraw = (e, gl) => {
+    const { x, y, width, height } = webglRef.current.getBoundingClientRect();
+    const pointX = Number((((e.pageX - x) / width - 0.5) * 2));
+    const pointY = Number((-((e.pageY - y) / height - 0.5) * 2));
+
+    const vs = `
+        attribute vec2 a_position;
+        void main(){
+            gl_Position  = vec4(a_position,1.0,1.0);
+            gl_PointSize  = 40.0;
+        }
+    `
+    const fs = `
+        void main(){
+            gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+        }
+    `
+    const vsShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vsShader, vs);
+    gl.compileShader(vsShader);
+
+    const fsShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fsShader, fs);
+    gl.compileShader(fsShader);
+
+    const program = gl.createProgram();
+    gl.attachShader(program, vsShader);
+    gl.attachShader(program, fsShader);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    pointsArr.push(...[pointX, pointY])
+    const point = [...pointsArr]
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(point), gl.STATIC_DRAW);
+
+    const a_position = gl.getAttribLocation(program, "a_position");
+    gl.vertexAttribPointer(
+      a_position,
+      2,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
+    gl.enableVertexAttribArray(a_position);
+    gl.drawArrays(gl.POINTS, 0, point.length / 2);
   }
 
   return (
