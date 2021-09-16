@@ -156,5 +156,8 @@
     "presets": [
       "react-app"
     ]
+  },
+  "volta": {
+    "node": "14.17.4"
   }
 }
