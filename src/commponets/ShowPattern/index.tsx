@@ -108,6 +108,9 @@ function ShowPattern(): JSX.Element {
         canvasDom.addEventListener("mousemove", eyeBallMove);
         drawDuola(ctx, eyePosition.eyeBallX, eyePosition.eyeBallY);
         break;
+      case "8":
+        drawQuadratic(ctx);
+        break;
       default:
         pointsArr = [];
         setShowCanvas(false);
@@ -193,6 +196,22 @@ function ShowPattern(): JSX.Element {
     ctx.stroke();
   };
 
+  /**
+   * 绘制二次贝塞尔曲线
+   */
+  const drawQuadratic = ctx => {
+    ctx.beginPath();
+    ctx.moveTo(50,50);
+    ctx.quadraticCurveTo(35,0,20,10)
+    ctx.quadraticCurveTo(0,25,8,60)
+    ctx.quadraticCurveTo(20,90,50,100)
+    ctx.quadraticCurveTo(85,85,92,60)
+    ctx.quadraticCurveTo(100,20,80,10)
+    ctx.quadraticCurveTo(65,0,50,50)
+    ctx.stroke();
+    ctx.fill();
+  };
+
   let timer;
   const eyeBallMove = e => {
     const newEyePosition = { ...eyePosition };
@@ -259,15 +278,6 @@ function ShowPattern(): JSX.Element {
 
   /**
    * 绘制哆啦A梦
-   * @param ctx
-   * @param fillColor
-   * @param strokeColor
-   * @param lineW
-   * @param lineType
-   * @param shadowBlur
-   * @param shadowOffsetX
-   * @param shadowOffsetY
-   * @param shadowColor
    */
   const drawDuola = (ctx, eyeBallX, eyeBallY) => {
     ctx.clearRect(0, 0, canvasRef.current.wdith, canvasRef.current.height);

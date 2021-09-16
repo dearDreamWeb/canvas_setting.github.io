@@ -26,17 +26,25 @@ const menuList = [
     key: "4",
     text: "绘制文本",
   },
+  // {
+  //   key: "5",
+  //   text: "绘制哆啦A梦",
+  // },
+  // {
+  //   key: "6",
+  //   text: "webgl绘制点",
+  // },
+  // {
+  //   key: "7",
+  //   text: "webgl点击绘制点",
+  // },
   {
-    key: "5",
-    text: "绘制哆啦A梦",
+    key: "8",
+    text: "二次贝塞尔曲线",
   },
   {
-    key: "6",
-    text: "webgl绘制点",
-  },
-  {
-    key: "7",
-    text: "webgl点击绘制点",
+    key: "9",
+    text: "三次贝塞尔曲线",
   },
 ];
 

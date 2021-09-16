@@ -53,8 +53,7 @@ function Slider(props: IProps): JSX.Element {
     if (state.drawType === "reset") {
       const { ctx, canvasW, canvasH } = canvasOpt;
       ctx.clearRect(0, 0, canvasW, canvasH);
-      drawLine(ctx, canvasW);
-      drawArc(ctx);
+      changeArc({ value });
     }
   }, [state.drawType]);
 
