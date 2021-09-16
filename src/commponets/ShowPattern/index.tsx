@@ -44,82 +44,64 @@ function ShowPattern(): JSX.Element {
       shadowOffsetX,
       shadowOffsetY,
       shadowColor,
+      scale, // 缩放
+      rotate, // 旋转
+      opacity, // 不透明度
     } = state;
+    const realScale = scale * 0.02;
+    const realRotate = rotate * 3.6;
+    const realOpacity = opacity * 0.01;
     ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
     canvasDom.addEventListener("mouseleave", () => {
       canvasDom.removeEventListener("mousemove", eyeBallMove);
     });
     webglRef.current.onclick = null;
-    setShowCanvas(true)
+    setShowCanvas(true);
+
+    ctx.save();
+    ctx.globalAlpha = realOpacity;
+    // 绘制阴影
+    ctx.shadowColor = shadowColor;
+    ctx.shadowBlur = shadowBlur;
+    ctx.shadowOffsetX = shadowOffsetX;
+    ctx.shadowOffsetY = shadowOffsetY;
+
+    ctx.fillStyle = fillColor;
+    ctx.strokeStyle = strokeColor;
+    // lineWidth明明是设置线宽，最小只能到1
+    ctx.lineWidth = lineW === 0 ? 1 : lineW;
+    // 实线和虚线切换
+    if (lineType === "dash") {
+      ctx.setLineDash([3]); // [实线长度, 间隙长度]
+      ctx.lineDashOffset = 0;
+    } else {
+      ctx.setLineDash([]);
+    }
+    ctx.translate(canvasDom.width / 2, canvasDom.height / 2);
+    ctx.scale(realScale, realScale);
+    ctx.rotate((Math.PI / 180) * realRotate);
+
     switch (drawType) {
       case "reset":
+        ctx.rotate((Math.PI / 180) * -realRotate);
+        ctx.translate(-canvasDom.width / 2, -canvasDom.height / 2);
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
         dispatch({ type: "resetState" });
         break;
       case "0":
-        drawRect(
-          ctx,
-          fillColor,
-          strokeColor,
-          lineW,
-          lineType,
-          shadowBlur,
-          shadowOffsetX,
-          shadowOffsetY,
-          shadowColor
-        );
+        drawRect(ctx);
         break;
       case "1":
-        drawTriangle(
-          ctx,
-          fillColor,
-          strokeColor,
-          lineW,
-          lineType,
-          shadowBlur,
-          shadowOffsetX,
-          shadowOffsetY,
-          shadowColor
-        );
+        drawTriangle(ctx);
         break;
       case "2":
-        drawLine(
-          ctx,
-          fillColor,
-          strokeColor,
-          lineW,
-          lineType,
-          shadowBlur,
-          shadowOffsetX,
-          shadowOffsetY,
-          shadowColor
-        );
+        drawLine(ctx);
         break;
       case "3":
-        drawArc(
-          ctx,
-          fillColor,
-          strokeColor,
-          lineW,
-          lineType,
-          shadowBlur,
-          shadowOffsetX,
-          shadowOffsetY,
-          shadowColor
-        );
+        drawArc(ctx);
         break;
       case "4":
-        drawText(
-          ctx,
-          fillColor,
-          strokeColor,
-          lineW,
-          lineType,
-          shadowBlur,
-          shadowOffsetX,
-          shadowOffsetY,
-          shadowColor
-        );
+        drawText(ctx);
         break;
       case "5":
         canvasDom.removeEventListener("mousemove", eyeBallMove);
@@ -127,125 +109,49 @@ function ShowPattern(): JSX.Element {
         drawDuola(ctx, eyePosition.eyeBallX, eyePosition.eyeBallY);
         break;
       default:
-        pointsArr = []
+        pointsArr = [];
         setShowCanvas(false);
         break;
     }
+    ctx.restore();
   }, [state]);
 
   useEffect(() => {
-
     const { drawType } = state;
     if (!showCanvas) {
       const webgl = webglRef.current;
-      const gl = webgl.getContext('webgl');
+      const gl = webgl.getContext("webgl");
       gl.clear(gl.COLOR_BUFFER_BIT);
       switch (drawType) {
-        case '6':
+        case "6":
           gl.clear(gl.COLOR_BUFFER_BIT);
-          webglDraw(gl)
+          webglDraw(gl);
           break;
-        case '7':
+        case "7":
           gl.clear(gl.COLOR_BUFFER_BIT);
           webglRef.current.onclick = null;
-          webglRef.current.onclick = (e) => webglClickDraw(e, gl)
+          webglRef.current.onclick = e => webglClickDraw(e, gl);
           break;
       }
     }
-  }, [showCanvas, state.drawType])
+  }, [showCanvas, state.drawType]);
 
   /**
    * 绘制矩形
-   * @param ctx
-   * @param fillColor
-   * @param strokeColor
-   * @param lineW
-   * @param lineType
-   * @param shadowBlur
-   * @param shadowOffsetX
-   * @param shadowOffsetY
-   * @param shadowColor
    */
-  const drawRect = (
-    ctx,
-    fillColor,
-    strokeColor,
-    lineW,
-    lineType,
-    shadowBlur,
-    shadowOffsetX,
-    shadowOffsetY,
-    shadowColor
-  ) => {
-    // 绘制阴影
-    ctx.shadowColor = shadowColor;
-    ctx.shadowBlur = shadowBlur;
-    ctx.shadowOffsetX = shadowOffsetX;
-    ctx.shadowOffsetY = shadowOffsetY;
-
-    ctx.fillStyle = fillColor;
-    ctx.strokeStyle = strokeColor;
-    // lineWidth明明是设置线宽，最小只能到1
-    ctx.lineWidth = lineW === 0 ? 1 : lineW;
-
-    // 实线和虚线切换
-    if (lineType === "dash") {
-      ctx.setLineDash([3]); // [实线长度, 间隙长度]
-      ctx.lineDashOffset = 0;
-    } else {
-      ctx.setLineDash([]);
-    }
-
-    ctx.fillRect(100, 100, 100, 100);
-    ctx.strokeRect(100, 100, 100, 100);
+  const drawRect = ctx => {
+    ctx.fillRect(-50, -50, 100, 100);
+    ctx.strokeRect(-50, -50, 100, 100);
   };
 
   /**
    * 绘制三角形
-   * @param ctx
-   * @param fillColor
-   * @param strokeColor
-   * @param lineW
-   * @param lineType
-   * @param shadowBlur
-   * @param shadowOffsetX
-   * @param shadowOffsetY
-   * @param shadowColor
    */
-  const drawTriangle = (
-    ctx,
-    fillColor,
-    strokeColor,
-    lineW,
-    lineType,
-    shadowBlur,
-    shadowOffsetX,
-    shadowOffsetY,
-    shadowColor
-  ) => {
+  const drawTriangle = ctx => {
     ctx.beginPath();
-
-    ctx.fillStyle = fillColor;
-    ctx.strokeStyle = strokeColor;
-    // lineWidth明明是设置线宽，最小只能到1
-    ctx.lineWidth = lineW === 0 ? 1 : lineW;
-
-    // 实线和虚线切换
-    if (lineType === "dash") {
-      ctx.setLineDash([3]); // [实线长度, 间隙长度]
-      ctx.lineDashOffset = 0;
-    } else {
-      ctx.setLineDash([]);
-    }
-
-    // 绘制阴影
-    ctx.shadowColor = shadowColor;
-    ctx.shadowBlur = shadowBlur;
-    ctx.shadowOffsetX = shadowOffsetX;
-    ctx.shadowOffsetY = shadowOffsetY;
-    ctx.moveTo(100, 100);
-    ctx.lineTo(100, 200);
-    ctx.lineTo(200, 200);
+    ctx.moveTo(-50, -50);
+    ctx.lineTo(-50, 50);
+    ctx.lineTo(50, 50);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -253,49 +159,11 @@ function ShowPattern(): JSX.Element {
 
   /**
    * 绘制直线
-   * @param ctx
-   * @param fillColor
-   * @param strokeColor
-   * @param lineW
-   * @param lineType
-   * @param shadowBlur
-   * @param shadowOffsetX
-   * @param shadowOffsetY
-   * @param shadowColor
    */
-  const drawLine = (
-    ctx,
-    fillColor,
-    strokeColor,
-    lineW,
-    lineType,
-    shadowBlur,
-    shadowOffsetX,
-    shadowOffsetY,
-    shadowColor
-  ) => {
+  const drawLine = ctx => {
     ctx.beginPath();
-
-    ctx.fillStyle = fillColor;
-    ctx.strokeStyle = strokeColor;
-    // lineWidth明明是设置线宽，最小只能到1
-    ctx.lineWidth = lineW === 0 ? 1 : lineW;
-
-    // 实线和虚线切换
-    if (lineType === "dash") {
-      ctx.setLineDash([3]); // [实线长度, 间隙长度]
-      ctx.lineDashOffset = 0;
-    } else {
-      ctx.setLineDash([]);
-    }
-
-    // 绘制阴影
-    ctx.shadowColor = shadowColor;
-    ctx.shadowBlur = shadowBlur;
-    ctx.shadowOffsetX = shadowOffsetX;
-    ctx.shadowOffsetY = shadowOffsetY;
-    ctx.moveTo(100, 100);
-    ctx.lineTo(200, 100);
+    ctx.moveTo(-50, 0);
+    ctx.lineTo(50, 0);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -303,48 +171,10 @@ function ShowPattern(): JSX.Element {
 
   /**
    * 绘制圆形
-   * @param ctx
-   * @param fillColor
-   * @param strokeColor
-   * @param lineW
-   * @param lineType
-   * @param shadowBlur
-   * @param shadowOffsetX
-   * @param shadowOffsetY
-   * @param shadowColor
    */
-  const drawArc = (
-    ctx,
-    fillColor,
-    strokeColor,
-    lineW,
-    lineType,
-    shadowBlur,
-    shadowOffsetX,
-    shadowOffsetY,
-    shadowColor
-  ) => {
+  const drawArc = ctx => {
     ctx.beginPath();
-
-    ctx.fillStyle = fillColor;
-    ctx.strokeStyle = strokeColor;
-    // lineWidth明明是设置线宽，最小只能到1
-    ctx.lineWidth = lineW === 0 ? 1 : lineW;
-
-    // 实线和虚线切换
-    if (lineType === "dash") {
-      ctx.setLineDash([3]); // [实线长度, 间隙长度]
-      ctx.lineDashOffset = 0;
-    } else {
-      ctx.setLineDash([]);
-    }
-
-    // 绘制阴影
-    ctx.shadowColor = shadowColor;
-    ctx.shadowBlur = shadowBlur;
-    ctx.shadowOffsetX = shadowOffsetX;
-    ctx.shadowOffsetY = shadowOffsetY;
-    ctx.arc(100, 100, 50, 0, Math.PI * 2, false);
+    ctx.arc(0, 0, 50, 0, Math.PI * 2, false);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -352,52 +182,12 @@ function ShowPattern(): JSX.Element {
 
   /**
    * 绘制文本
-   * @param ctx
-   * @param fillColor
-   * @param strokeColor
-   * @param lineW
-   * @param lineType
-   * @param shadowBlur
-   * @param shadowOffsetX
-   * @param shadowOffsetY
-   * @param shadowColor
    */
-  const drawText = (
-    ctx,
-    fillColor,
-    strokeColor,
-    lineW,
-    lineType,
-    shadowBlur,
-    shadowOffsetX,
-    shadowOffsetY,
-    shadowColor
-  ) => {
+  const drawText = ctx => {
     ctx.beginPath();
-
-    ctx.fillStyle = fillColor;
-    ctx.strokeStyle = strokeColor;
-    // lineWidth明明是设置线宽，最小只能到1
-    ctx.lineWidth = lineW === 0 ? 1 : lineW;
-
-    // 实线和虚线切换
-    if (lineType === "dash") {
-      ctx.setLineDash([3]); // [实线长度, 间隙长度]
-      ctx.lineDashOffset = 0;
-    } else {
-      ctx.setLineDash([]);
-    }
-
-    // 绘制阴影
-    ctx.shadowColor = shadowColor;
-    ctx.shadowBlur = shadowBlur;
-    ctx.shadowOffsetX = shadowOffsetX;
-    ctx.shadowOffsetY = shadowOffsetY;
-
     // 绘制文本
     ctx.font = "30px sans-serif";
-    ctx.fillText("Canvas实验室", 100, 100);
-
+    ctx.fillText("Canvas实验室", -100, -15);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -405,7 +195,6 @@ function ShowPattern(): JSX.Element {
 
   let timer;
   const eyeBallMove = e => {
-    console.log(1);
     const newEyePosition = { ...eyePosition };
     timer && clearTimeout(timer);
     timer = setTimeout(() => {
@@ -419,7 +208,7 @@ function ShowPattern(): JSX.Element {
       // 勾股定理求距离
       const distance = Math.sqrt(
         Math.pow(moveX - newEyePosition.eyeBallX, 2) +
-        Math.pow(moveY - newEyePosition.eyeBallY, 2)
+          Math.pow(moveY - newEyePosition.eyeBallY, 2)
       );
       // 定时器的速度
       const timeSpeed = 30;
@@ -608,18 +397,18 @@ function ShowPattern(): JSX.Element {
   /**
    * webgl绘制点
    */
-  const webglDraw = (gl) => {
+  const webglDraw = gl => {
     const vs = `
         void main(){
             gl_Position  = vec4(0.0,0.0,1.0,1.0);
             gl_PointSize  = 40.0;
         }
-    `
+    `;
     const fs = `
         void main(){
             gl_FragColor = vec4(1.0,0.0,0.0,1.0);
         }
-    `
+    `;
     const vsShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vsShader, vs);
     gl.compileShader(vsShader);
@@ -630,7 +419,6 @@ function ShowPattern(): JSX.Element {
     gl.compileShader(fsShader);
     let success1 = gl.getShaderParameter(fsShader, gl.COMPILE_STATUS);
 
-
     const program = gl.createProgram();
     gl.attachShader(program, vsShader);
     gl.attachShader(program, fsShader);
@@ -638,16 +426,15 @@ function ShowPattern(): JSX.Element {
     gl.useProgram(program);
 
     gl.drawArrays(gl.POINTS, 0, 1);
-  }
-
+  };
 
   /**
    * 点击绘制点
    */
   const webglClickDraw = (e, gl) => {
     const { x, y, width, height } = webglRef.current.getBoundingClientRect();
-    const pointX = Number((((e.pageX - x) / width - 0.5) * 2));
-    const pointY = Number((-((e.pageY - y) / height - 0.5) * 2));
+    const pointX = Number(((e.pageX - x) / width - 0.5) * 2);
+    const pointY = Number(-((e.pageY - y) / height - 0.5) * 2);
 
     const vs = `
         attribute vec2 a_position;
@@ -655,12 +442,12 @@ function ShowPattern(): JSX.Element {
             gl_Position  = vec4(a_position,1.0,1.0);
             gl_PointSize  = 40.0;
         }
-    `
+    `;
     const fs = `
         void main(){
             gl_FragColor = vec4(1.0,0.0,0.0,1.0);
         }
-    `
+    `;
     const vsShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vsShader, vs);
     gl.compileShader(vsShader);
@@ -675,29 +462,26 @@ function ShowPattern(): JSX.Element {
     gl.linkProgram(program);
     gl.useProgram(program);
 
-    pointsArr.push(...[pointX, pointY])
-    const point = [...pointsArr]
+    pointsArr.push(...[pointX, pointY]);
+    const point = [...pointsArr];
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(point), gl.STATIC_DRAW);
 
     const a_position = gl.getAttribLocation(program, "a_position");
-    gl.vertexAttribPointer(
-      a_position,
-      2,
-      gl.FLOAT,
-      false,
-      0,
-      0
-    );
+    gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_position);
     gl.drawArrays(gl.POINTS, 0, point.length / 2);
-  }
+  };
 
   return (
     <div ref={canvasWrapRef} className={styles.showPattern_wrap}>
       <canvas ref={canvasRef}></canvas>
-      <canvas ref={webglRef} className={styles.webgl_canvas} style={{ display: showCanvas ? 'none' : 'block' }}></canvas>
+      <canvas
+        ref={webglRef}
+        className={styles.webgl_canvas}
+        style={{ display: showCanvas ? "none" : "block" }}
+      ></canvas>
     </div>
   );
 }

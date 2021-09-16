@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useContext, useRef, useState } from "react";
 import styles from "./index.module.scss";
 import { ContextData } from "../../globalState";
@@ -6,6 +7,8 @@ interface IProps {
   text?: string; // 文本
   onChange?: (val: number) => void; // 数值改变
   value?: number; // 数值
+  min?: number;
+  max?: number;
 }
 interface ICanvasOpt {
   canvasDom: HTMLElement | null;
@@ -23,14 +26,28 @@ const initCanvasOpt: ICanvasOpt = {
 
 function Slider(props: IProps): JSX.Element {
   const { onChange, text, value } = props;
-  const canvasRef = useRef<any>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasOpt, setCanvasOpt] = useState<ICanvasOpt>(initCanvasOpt);
+  const [isRender, setIsRender] = useState<boolean>(false);
+  const [isMove, setIsMove] = useState<boolean>(false);
 
   const { state } = useContext(ContextData);
 
   useEffect(() => {
     initCanvas();
   }, []);
+
+  useEffect(() => {
+    if (value && canvasOpt.canvasDom) {
+      setIsRender(true);
+    }
+  }, [canvasOpt, value]);
+
+  useEffect(() => {
+    if (value && isRender) {
+      changeArc({ value });
+    }
+  }, [isRender]);
 
   useEffect(() => {
     if (state.drawType === "reset") {
@@ -43,16 +60,27 @@ function Slider(props: IProps): JSX.Element {
 
   // 当canvas的dom获取时渲染
   useEffect(() => {
-    const { ctx, canvasW, canvasH, canvasDom } = canvasOpt;
+    const { canvasDom } = canvasOpt;
     if (!canvasDom) {
       return;
     }
-    canvasDom.removeEventListener("click", changeArc);
-    canvasDom.addEventListener("click", changeArc);
-    ctx.clearRect(0, 0, canvasW, canvasH);
-    drawLine(ctx, canvasW);
-    drawArc(ctx);
-  }, [canvasOpt]);
+    changeArc({ value });
+    canvasDom.onclick = e => changeArc({ e });
+    canvasDom.onmousemove = null;
+    canvasDom.onmousedown = e => {
+      setIsMove(true);
+      changeArc({ e });
+    };
+    canvasDom.onmousemove = e => {
+      if (isMove) {
+        changeArc({ e });
+      }
+    };
+    document.onmouseup = () => {
+      setIsMove(false);
+      canvasDom.onmousemove = null;
+    };
+  }, [canvasOpt, isMove]);
 
   //   初始化canvas的配置数据
   const initCanvas = () => {
@@ -88,10 +116,10 @@ function Slider(props: IProps): JSX.Element {
   };
 
   // 点击改变圆点的位置
-  const changeArc = e => {
+  const changeArc = ({ e, value }: { e?: MouseEvent; value?: number }) => {
     const { ctx, canvasW, canvasH, canvasDom } = canvasOpt;
     const { x } = canvasDom!.getBoundingClientRect();
-    let positionX = e.pageX - x;
+    let positionX = e ? e!.pageX - x : value!;
     let xMax = canvasW - 5; // 能移动的最大距离
     let xMin = 5; // 能移动的最小距离(半径)
     // 鼠标点击大于圆的半径
@@ -106,9 +134,8 @@ function Slider(props: IProps): JSX.Element {
       let num = parseInt(
         (((positionX - xMin) / (xMax - xMin)) * 100).toFixed(2)
       );
-      onChange && onChange(num);
+      onChange && onChange(value || num);
     }
-
     ctx.clearRect(0, 0, canvasW, canvasH);
     drawLine(ctx, canvasW);
     drawArc(ctx, positionX);

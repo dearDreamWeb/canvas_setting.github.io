@@ -11,6 +11,9 @@ const initData = {
     shadowOffsetX: 0, // 阴影X轴偏移量
     shadowOffsetY: 0, // 阴影Y轴偏移量
     shadowColor: '#000', // 阴影颜色
+    scale: 50, // 缩放
+    rotate: 0, // 旋转
+    opacity: 100, // 不透明度
 };
 
 // 派发事件
