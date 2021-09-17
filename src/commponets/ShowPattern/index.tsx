@@ -47,9 +47,19 @@ function ShowPattern(): JSX.Element {
       scale, // 缩放
       rotate, // 旋转
       opacity, // 不透明度
+      textInput, // 文本内容
+      imgUrl, // 图片地址
+      sliceX, // 切片X
+      sliceY, // 切片Y
+      originX, // 原点坐标X
+      originY, // 原点坐标Y
+      fontSize, // 文本字体大小
+      textAlign, // 文本对齐方式
+      textBaseline, // 文本基线对齐
+      textDir, // 文本方向
     } = state;
     const realScale = scale * 0.02;
-    const realRotate = rotate * 3.6;
+    const realRotate = rotate * 3.6 * (Math.PI / 180);
     const realOpacity = opacity * 0.01;
     ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
     canvasDom.addEventListener("mouseleave", () => {
@@ -60,6 +70,7 @@ function ShowPattern(): JSX.Element {
 
     ctx.save();
     ctx.globalAlpha = realOpacity;
+
     // 绘制阴影
     ctx.shadowColor = shadowColor;
     ctx.shadowBlur = shadowBlur;
@@ -79,14 +90,13 @@ function ShowPattern(): JSX.Element {
     }
     ctx.translate(canvasDom.width / 2, canvasDom.height / 2);
     ctx.scale(realScale, realScale);
-    ctx.rotate((Math.PI / 180) * realRotate);
+    ctx.rotate(realRotate);
 
     switch (drawType) {
       case "reset":
         ctx.rotate((Math.PI / 180) * -realRotate);
         ctx.translate(-canvasDom.width / 2, -canvasDom.height / 2);
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-        dispatch({ type: "resetState" });
         break;
       case "0":
         drawRect(ctx);
@@ -101,15 +111,32 @@ function ShowPattern(): JSX.Element {
         drawArc(ctx);
         break;
       case "4":
-        drawText(ctx);
+        drawText(ctx, textInput, fontSize, textAlign, textBaseline, textDir);
         break;
       case "5":
+        ctx.restore()
         canvasDom.removeEventListener("mousemove", eyeBallMove);
         canvasDom.addEventListener("mousemove", eyeBallMove);
         drawDuola(ctx, eyePosition.eyeBallX, eyePosition.eyeBallY);
         break;
       case "8":
         drawQuadratic(ctx);
+        break;
+      case "9":
+        drawBezier(ctx);
+        break;
+      case "10":
+        drawImageHandler(
+          ctx,
+          canvasDom,
+          realScale,
+          realRotate,
+          imgUrl,
+          sliceX,
+          sliceY,
+          originX,
+          originY
+        );
         break;
       default:
         pointsArr = [];
@@ -186,11 +213,21 @@ function ShowPattern(): JSX.Element {
   /**
    * 绘制文本
    */
-  const drawText = ctx => {
+  const drawText = (
+    ctx,
+    textInput,
+    fontSize,
+    textAlign,
+    textBaseline,
+    textDir
+  ) => {
     ctx.beginPath();
     // 绘制文本
-    ctx.font = "30px sans-serif";
-    ctx.fillText("Canvas实验室", -100, -15);
+    ctx.font = `${fontSize}px sans-serif`;
+    ctx.direction = textDir;
+    ctx.textAlign = textAlign;
+    ctx.textBaseline = textBaseline;
+    ctx.fillText(textInput, -100, -Number(fontSize) / 2);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -201,15 +238,73 @@ function ShowPattern(): JSX.Element {
    */
   const drawQuadratic = ctx => {
     ctx.beginPath();
-    ctx.moveTo(50,50);
-    ctx.quadraticCurveTo(35,0,20,10)
-    ctx.quadraticCurveTo(0,25,8,60)
-    ctx.quadraticCurveTo(20,90,50,100)
-    ctx.quadraticCurveTo(85,85,92,60)
-    ctx.quadraticCurveTo(100,20,80,10)
-    ctx.quadraticCurveTo(65,0,50,50)
+    ctx.moveTo(50, 50);
+    ctx.quadraticCurveTo(35, 0, 20, 10);
+    ctx.quadraticCurveTo(0, 25, 8, 60);
+    ctx.quadraticCurveTo(20, 90, 50, 100);
+    ctx.quadraticCurveTo(85, 85, 92, 60);
+    ctx.quadraticCurveTo(100, 20, 80, 10);
+    ctx.quadraticCurveTo(65, 0, 50, 50);
     ctx.stroke();
     ctx.fill();
+  };
+
+  /**
+   * 绘制三次贝塞尔曲线
+   */
+  const drawBezier = ctx => {
+    ctx.beginPath();
+    ctx.moveTo(50, 50);
+    ctx.bezierCurveTo(35, 10, 10, 30, 10, 40);
+    ctx.bezierCurveTo(0, 60, 40, 100, 50, 100);
+    ctx.bezierCurveTo(60, 100, 100, 60, 90, 40);
+    ctx.bezierCurveTo(75, 10, 50, 40, 50, 50);
+    ctx.stroke();
+    ctx.fill();
+  };
+
+  /**
+   * 绘制图片
+   */
+  const drawImageHandler = (
+    ctx,
+    canvasDom,
+    realScale,
+    realRotate,
+    imgUrl,
+    sliceX,
+    sliceY,
+    originX,
+    originY
+  ) => {
+    const { width, height } = canvasDom;
+    ctx.restore();
+    const img = new Image();
+    img.src = imgUrl;
+    img.onload = () => {
+      ctx.save();
+      ctx.clearRect(0, 0, width, height);
+      const imgW = 400;
+      const imgH = 400;
+      const translateX = (imgW * realScale) / 2 + originX;
+      const translateY = (imgH * realScale) / 2 + originY;
+      ctx.translate(translateX, translateY);
+      ctx.rotate(realRotate);
+      ctx.translate(-translateX, -translateY);
+      ctx.drawImage(
+        img,
+        sliceX,
+        sliceY,
+        imgW * realScale,
+        imgH * realScale,
+        originX,
+        originY,
+        imgW * realScale,
+        imgH * realScale
+      );
+      // ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+    };
   };
 
   let timer;

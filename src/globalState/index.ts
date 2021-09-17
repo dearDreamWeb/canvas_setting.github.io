@@ -14,6 +14,16 @@ const initData = {
     scale: 50, // 缩放
     rotate: 0, // 旋转
     opacity: 100, // 不透明度
+    textInput: 'Canvas实验室', // 文本内容
+    fontSize: '36', // 文本字体大小
+    textAlign: 'left', // 文本对齐方式
+    textBaseline: 'top', // 文本基线对齐
+    textDir: 'ltr', // 文本方向
+    imgUrl: 'http://pic.616pic.com/ad_preview/00/09/19/5d50c8bfe378b.jpg-0.jpg!/fw/800/quality/90/unsharp/true/compress/true?%3E', // 图片地址
+    sliceX: 0, // 切片X
+    sliceY: 0, // 切片Y
+    originX: 0, // 原点坐标X
+    originY: 0, // 原点坐标Y
 };
 
 // 派发事件
@@ -21,7 +31,7 @@ const reducer = (state, action) => {
     switch (action.type) {
         // 初始化数据
         case "resetState":
-            return { ...initData }
+            return { ...initData, drawType: 'reset' }
         // 改变数据
         case "changeState":
             return { ...state, ...action.data };

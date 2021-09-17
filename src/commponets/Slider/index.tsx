@@ -54,6 +54,7 @@ function Slider(props: IProps): JSX.Element {
       const { ctx, canvasW, canvasH } = canvasOpt;
       ctx.clearRect(0, 0, canvasW, canvasH);
       changeArc({ value });
+      console.log(value)
     }
   }, [state.drawType]);
 

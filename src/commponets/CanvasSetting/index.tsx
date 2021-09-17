@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import styles from "./index.module.scss";
 import { ContextData } from "../../globalState";
 import Slider from "../Slider";
@@ -21,11 +21,11 @@ function CanvasSetting(): JSX.Element {
     });
   };
 
-  //   线的类型改变
-  const changeLineType = e => {
+  //   select改变
+  const changeSelect = (e, type) => {
     dispatch({
       type: "changeState",
-      data: { lineType: e.target.value },
+      data: { [type]: e.target.value },
     });
   };
 
@@ -37,8 +37,7 @@ function CanvasSetting(): JSX.Element {
           className={styles.reset_btn}
           onClick={() => {
             dispatch({
-              type: "changeState",
-              data: { drawType: "reset" },
+              type: "resetState",
             });
           }}
         >
@@ -115,13 +114,107 @@ function CanvasSetting(): JSX.Element {
           线的类型：
           <select
             value={state.lineType}
-            onChange={changeLineType}
+            onChange={e => changeSelect(e, "lineType")}
             className={styles.select_diy}
           >
             <option value="solid">实线</option>
             <option value="dash">虚线</option>
           </select>
         </div>
+        {state.drawType === "4" ? (
+          <>
+            <div>
+              文本内容：
+              <input
+                type="text"
+                value={state.textInput}
+                placeholder="请输入文本内容"
+                onChange={e => changeState("textInput", e.target.value)}
+              />
+            </div>
+            <div>
+              字体大小：
+              <select
+                value={state.fontSize}
+                onChange={e => changeSelect(e, "fontSize")}
+                className={styles.select_diy}
+              >
+                <option value="36">36</option>
+                <option value="44">44</option>
+                <option value="56">56</option>
+              </select>
+            </div>
+            <div>
+              对齐方式：
+              <select
+                value={state.textAlign}
+                onChange={e => changeSelect(e, "textAlign")}
+                className={styles.select_diy}
+              >
+                <option value="left">左对齐</option>
+                <option value="center">居中对齐</option>
+                <option value="right">右对齐</option>
+              </select>
+            </div>
+            <div>
+              基线对齐：
+              <select
+                value={state.textBaseline}
+                onChange={e => changeSelect(e, "textBaseline")}
+                className={styles.select_diy}
+              >
+                <option value="top">顶部</option>
+                <option value="middle">居中</option>
+                <option value="bottom">底部</option>
+              </select>
+            </div>
+            <div>
+              文本方向：
+              <select
+                value={state.textDir}
+                onChange={e => changeSelect(e, "textDir")}
+                className={styles.select_diy}
+              >
+                <option value="ltr">从左向右</option>
+                <option value="rtl">从右向左</option>
+              </select>
+            </div>
+          </>
+        ) : null}
+
+        {state.drawType === "10" ? (
+          <>
+            <div>
+              图片地址：
+              <input
+                type="text"
+                value={state.imgUrl}
+                placeholder="请输入图片地址"
+                onChange={e => changeState("imgUrl", e.target.value)}
+              />
+            </div>
+            <Slider
+              text="切片X："
+              onChange={data => changeState("sliceX", data)}
+              value={state.sliceX}
+            />
+            <Slider
+              text="切片Y："
+              onChange={data => changeState("sliceY", data)}
+              value={state.sliceY}
+            />
+            <Slider
+              text="原点坐标X："
+              onChange={data => changeState("originX", data)}
+              value={state.originX}
+            />
+            <Slider
+              text="原点坐标Y："
+              onChange={data => changeState("originY", data)}
+              value={state.originY}
+            />
+          </>
+        ) : null}
       </section>
     </div>
   );
