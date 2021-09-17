@@ -62,6 +62,7 @@ function ShowPattern(): JSX.Element {
     const realRotate = rotate * 3.6 * (Math.PI / 180);
     const realOpacity = opacity * 0.01;
     ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+    canvasDom.removeEventListener("mousemove", eyeBallMove);
     canvasDom.addEventListener("mouseleave", () => {
       canvasDom.removeEventListener("mousemove", eyeBallMove);
     });
