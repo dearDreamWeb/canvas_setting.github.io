@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useContext, useState } from "react";
 import styles from "./index.module.scss";
 import { ContextData } from "../../globalState";
+import drawRect from "../draw/drawRect";
 
 function ShowPattern(): JSX.Element {
   const canvasWrapRef = useRef<any>(null);
@@ -100,7 +101,12 @@ function ShowPattern(): JSX.Element {
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
         break;
       case "0":
-        drawRect(ctx);
+        drawRect(ctx, canvasDom, state, data =>
+          dispatch({
+            type: "changeRect",
+            data,
+          })
+        );
         break;
       case "1":
         drawTriangle(ctx);
@@ -115,7 +121,7 @@ function ShowPattern(): JSX.Element {
         drawText(ctx, textInput, fontSize, textAlign, textBaseline, textDir);
         break;
       case "5":
-        ctx.restore()
+        ctx.restore();
         canvasDom.removeEventListener("mousemove", eyeBallMove);
         canvasDom.addEventListener("mousemove", eyeBallMove);
         drawDuola(ctx, eyePosition.eyeBallX, eyePosition.eyeBallY);
@@ -166,14 +172,6 @@ function ShowPattern(): JSX.Element {
       }
     }
   }, [showCanvas, state.drawType]);
-
-  /**
-   * 绘制矩形
-   */
-  const drawRect = ctx => {
-    ctx.fillRect(-50, -50, 100, 100);
-    ctx.strokeRect(-50, -50, 100, 100);
-  };
 
   /**
    * 绘制三角形

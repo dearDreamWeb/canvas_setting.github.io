@@ -24,7 +24,57 @@ const initData = {
     sliceY: 0, // 切片Y
     originX: 0, // 原点坐标X
     originY: 0, // 原点坐标Y
+    rectParams: {
+        x: 50,
+        y: 50,
+        width: 100,
+        height: 100,
+        lines: [
+            // 上
+            {
+                p1: { x: 50, y: 50 },
+                p2: { x: 150, y: 50 },
+            },
+            // 左
+            {
+                p1: { x: 50, y: 50 },
+                p2: { x: 50, y: 150 },
+            },
+            // 右
+            {
+                p1: { x: 150, y: 50 },
+                p2: { x: 150, y: 150 },
+            },
+            // 下
+            {
+                p1: { x: 50, y: 150 },
+                p2: { x: 150, y: 150 },
+            },
+        ],
+        // 减5是因为控制点宽高是10
+        controlPoints: [
+            { x: 50 - 5, y: 50 - 5 },     // tl
+            { x: 150 - 5, y: 50 - 5 },    // tr
+            { x: 50 - 5, y: 150 - 5 },    // bl
+            { x: 150 - 5, y: 150 - 5 },   // br
+            { x: 100 - 5, y: 50 - 5 },    // tc
+            { x: 100 - 5, y: 150 - 5 },   // bc
+            { x: 50 - 5, y: 100 - 5 },    // lc
+            { x: 150 - 5, y: 100 - 5 },   // rc
+            { x: 100 - 5, y: 50 - 40 }   // rp rotate point旋转点
+        ],
+        controlPointsType: ['tl', 'tr', 'bl', 'br', 'tc', 'bc', 'lc', 'rc', 'rp']
+    }
 };
+
+interface linesItem {
+    p1: controlPointsItem
+    p2: controlPointsItem
+}
+interface controlPointsItem {
+    x: number;
+    y: number
+}
 
 // 派发事件
 const reducer = (state, action) => {
@@ -35,6 +85,40 @@ const reducer = (state, action) => {
         // 改变数据
         case "changeState":
             return { ...state, ...action.data };
+        // 改变矩形数据
+        case "changeRect":
+            // const { x, y, width, height } = action.data;
+            // let lines: linesItem[] = []
+            // let controlPoints: controlPointsItem[] = []
+
+            // lines[0] = {
+            //     p1: { x, y },
+            //     p2: { x: x + width, y },
+            // };
+            // lines[1] = {
+            //     p1: { x, y },
+            //     p2: { x, y: y + height },
+            // };
+            // lines[2] = {
+            //     p1: { x: x + width, y },
+            //     p2: { x: x + width, y: y + height },
+            // };
+            // lines[3] = {
+            //     p1: { x, y: y + height },
+            //     p2: { x: x + width, y: y + height },
+            // };
+            // // ['tl', 'tr', 'bl', 'br', 'tc', 'bc', 'lc', 'rc', 'rp']
+            // controlPoints[0] = { x: x - 5, y: y - 5 }
+            // controlPoints[1] = { x: x + width - 5, y: y - 5 }
+            // controlPoints[2] = { x: x - 5, y: y + height - 5 }
+            // controlPoints[3] = { x: x + width - 5, y: y + height - 5 }
+            // controlPoints[4] = { x: x + width / 2 - 5, y: y - 5 }
+            // controlPoints[5] = { x: x + width / 2 - 5, y: y + height - 5 }
+            // controlPoints[6] = { x: x - 5, y: y + height / 2 - 5 }
+            // controlPoints[7] = { x: x + width - 5, y: y + height / 2 - 5 }
+            // controlPoints[8] = { x: x + width / 2 - 5, y: y - 40 }
+
+            return { ...state, rectParams: { ...action.data} };
         default:
             return state
     }
