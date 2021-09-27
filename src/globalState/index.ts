@@ -63,7 +63,8 @@ const initData = {
             { x: 150 - 5, y: 100 - 5 },   // rc
             { x: 100 - 5, y: 50 - 40 }   // rp rotate point旋转点
         ],
-        controlPointsType: ['tl', 'tr', 'bl', 'br', 'tc', 'bc', 'lc', 'rc', 'rp']
+        controlPointsType: ['tl', 'tr', 'bl', 'br', 'tc', 'bc', 'lc', 'rc', 'rp'],
+        isRectSelected: false
     }
 };
 
@@ -87,38 +88,7 @@ const reducer = (state, action) => {
             return { ...state, ...action.data };
         // 改变矩形数据
         case "changeRect":
-            // const { x, y, width, height } = action.data;
-            // let lines: linesItem[] = []
-            // let controlPoints: controlPointsItem[] = []
-
-            // lines[0] = {
-            //     p1: { x, y },
-            //     p2: { x: x + width, y },
-            // };
-            // lines[1] = {
-            //     p1: { x, y },
-            //     p2: { x, y: y + height },
-            // };
-            // lines[2] = {
-            //     p1: { x: x + width, y },
-            //     p2: { x: x + width, y: y + height },
-            // };
-            // lines[3] = {
-            //     p1: { x, y: y + height },
-            //     p2: { x: x + width, y: y + height },
-            // };
-            // // ['tl', 'tr', 'bl', 'br', 'tc', 'bc', 'lc', 'rc', 'rp']
-            // controlPoints[0] = { x: x - 5, y: y - 5 }
-            // controlPoints[1] = { x: x + width - 5, y: y - 5 }
-            // controlPoints[2] = { x: x - 5, y: y + height - 5 }
-            // controlPoints[3] = { x: x + width - 5, y: y + height - 5 }
-            // controlPoints[4] = { x: x + width / 2 - 5, y: y - 5 }
-            // controlPoints[5] = { x: x + width / 2 - 5, y: y + height - 5 }
-            // controlPoints[6] = { x: x - 5, y: y + height / 2 - 5 }
-            // controlPoints[7] = { x: x + width - 5, y: y + height / 2 - 5 }
-            // controlPoints[8] = { x: x + width / 2 - 5, y: y - 40 }
-
-            return { ...state, rectParams: { ...action.data} };
+            return Object.assign(state, { rectParams: { ...action.data } });
         default:
             return state
     }

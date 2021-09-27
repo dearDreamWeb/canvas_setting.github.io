@@ -30,7 +30,7 @@ function ShowPattern(): JSX.Element {
 
   //   canvas配置改变时绘图
   useEffect(() => {
-    if (!state.drawType) {
+    if (!state.drawType || state.drawType === "0") {
       return;
     }
     const canvasDom = canvasRef.current;
@@ -100,14 +100,6 @@ function ShowPattern(): JSX.Element {
         ctx.translate(-canvasDom.width / 2, -canvasDom.height / 2);
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
         break;
-      case "0":
-        drawRect(ctx, canvasDom, state, data =>
-          dispatch({
-            type: "changeRect",
-            data,
-          })
-        );
-        break;
       case "1":
         drawTriangle(ctx);
         break;
@@ -152,6 +144,40 @@ function ShowPattern(): JSX.Element {
     }
     ctx.restore();
   }, [state]);
+
+  useEffect(() => {
+    if (!state.drawType) {
+      return;
+    }
+    const canvasDom = canvasRef.current;
+    const ctx = canvasDom.getContext("2d");
+    if (state.drawType !== "0") {
+      return;
+    }
+    drawRect(ctx, canvasDom, state, "", data =>
+      dispatch({
+        type: "changeRect",
+        data,
+      })
+    );
+  }, [state.drawType]);
+
+  useEffect(() => {
+    if (!state.drawType) {
+      return;
+    }
+    const canvasDom = canvasRef.current;
+    const ctx = canvasDom.getContext("2d");
+    if (state.drawType !== "0") {
+      return;
+    }
+    drawRect(ctx, canvasDom, state, "rotate", data =>
+      dispatch({
+        type: "changeRect",
+        data,
+      })
+    );
+  }, [state.rotate]);
 
   useEffect(() => {
     const { drawType } = state;
