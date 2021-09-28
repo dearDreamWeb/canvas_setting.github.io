@@ -28,21 +28,22 @@ const drawControl = (ctx, controlPoints, x, y, width, height, realRotate, callba
         ctx.restore();
     })
     const lines: linesItem[] = []
+
     lines[0] = {
-        p1: newControlPoints[0],
-        p2: newControlPoints[1],
+        p1: getEndPointByRotate([x, y], [x + width / 2, y + height / 2], realRotate),
+        p2: getEndPointByRotate([x + width, y], [x + width / 2, y + height / 2], realRotate),
     };
     lines[1] = {
-        p1: newControlPoints[0],
-        p2: newControlPoints[2],
+        p1: getEndPointByRotate([x, y], [x + width / 2, y + height / 2], realRotate),
+        p2: getEndPointByRotate([x, y + height], [x + width / 2, y + height / 2], realRotate),
     };
     lines[2] = {
-        p1: newControlPoints[1],
-        p2: newControlPoints[3],
+        p1: getEndPointByRotate([x + width, y], [x + width / 2, y + height / 2], realRotate),
+        p2: getEndPointByRotate([x + width, y + height], [x + width / 2, y + height / 2], realRotate),
     };
     lines[3] = {
-        p1: newControlPoints[2],
-        p2: newControlPoints[3],
+        p1: getEndPointByRotate([x, y + height], [x + width / 2, y + height / 2], realRotate),
+        p2: getEndPointByRotate([x + width, y + height], [x + width / 2, y + height / 2], realRotate),
     };
     callback(lines)
 }
@@ -75,16 +76,18 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
     let { x, y, width, height } = rectParams;
     let isRectSelected = false;
     const realRotate = rotate * 3.6 * (Math.PI / 180);
+    let selectedControl: null | number = null
 
     // 判断是否点击中图形
     const isSelected = (e) => {
-        let eventX = e.clientX - canvasDom.getBoundingClientRect().left;
-        let eventY = e.clientY - canvasDom.getBoundingClientRect().top;
+        let eventX = Math.floor(e.clientX - canvasDom.getBoundingClientRect().left);
+        let eventY = Math.floor(e.clientY - canvasDom.getBoundingClientRect().top);
         let intersectionCount = 0;
         for (let i = 0; i < lines.length; i++) {
             let line = lines[i];
             // 两个顶点
             let { p1, p2 } = line;
+
             if ((p1.y < eventY && p2.y < eventY) || (p1.y >= eventY && p2.y >= eventY)) {
                 continue;
             } else {
@@ -94,10 +97,49 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
                 }
             }
         }
-        return !(intersectionCount % 2 === 0);
+
+        // 是否点击了控制器
+        let isSelectedControl = false
+        selectedControl = null
+        const newControlPoints = controlPoints.map((itemPoints) => getEndPointByRotate([itemPoints.x, itemPoints.y], [x + width / 2, y + height / 2], realRotate))
+        newControlPoints.forEach((item) => {
+            const lines: linesItem[] = []
+
+            lines[0] = {
+                p1: getEndPointByRotate([item.x, item.y], [item.x + 5, item.y + 5], realRotate),
+                p2: getEndPointByRotate([item.x + 10, y], [item.x + 5, item.y + 5], realRotate),
+            };
+            lines[1] = {
+                p1: getEndPointByRotate([item.x, item.y], [item.x+5, item.y+5], realRotate),
+                p2: getEndPointByRotate([item.x, item.y + 10], [item.x+5, item.y+5], realRotate),
+            };
+            lines[2] = {
+                p1: getEndPointByRotate([item.x + 10, item.y], [item.x+5, item.y+5], realRotate),
+                p2: getEndPointByRotate([item.x + 10, item.y + 10], [item.x+5, item.y+5], realRotate),
+            };
+            lines[3] = {
+                p1: getEndPointByRotate([item.x, item.y + 10], [item.x+5, item.y+5], realRotate),
+                p2: getEndPointByRotate([item.x + 10, item.y + 10], [item.x+5, item.y+5], realRotate),
+            };
+            let count = 0;
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                // 两个顶点
+                let { p1, p2 } = line;
+
+                if ((p1.y < eventY && p2.y < eventY) || (p1.y >= eventY && p2.y >= eventY)) {
+                    continue;
+                } else {
+                    const sx = ((eventY - p1.y) / (p2.y - p1.y)) * (p2.x - p1.x) + p1.x;
+                    if (sx >= eventX) {
+                        count++;
+                    }
+                }
+            }
+            isSelectedControl = !(count % 2 === 0)
+        })
+        return !(intersectionCount % 2 === 0) || isSelectedControl;
     }
-
-
 
     if (type === 'rotate') {
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
@@ -114,7 +156,6 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
     canvasDom.onmousedown = (e) => {
         if (isSelected(e)) {
             isRectSelected = true;
-
             drawRectBox(ctx, x, y, width, height, realRotate)
             drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
             canvasDom.onmousemove = (e) => {

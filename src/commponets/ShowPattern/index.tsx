@@ -154,6 +154,7 @@ function ShowPattern(): JSX.Element {
     if (state.drawType !== "0") {
       return;
     }
+    ctx.clearRect(0, 0, canvasDom.width, canvasDom.height)
     drawRect(ctx, canvasDom, state, "", data =>
       dispatch({
         type: "changeRect",
