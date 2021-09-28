@@ -76,6 +76,7 @@ function CanvasSetting(): JSX.Element {
         <Slider
           text="旋转："
           onChange={data => changeState("rotate", data)}
+          type="rotate"
           value={state.rotate}
         />
         <Slider

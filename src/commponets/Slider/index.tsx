@@ -9,6 +9,7 @@ interface IProps {
   value?: number; // 数值
   min?: number;
   max?: number;
+  type?: string;
 }
 interface ICanvasOpt {
   canvasDom: HTMLElement | null;
@@ -25,7 +26,7 @@ const initCanvasOpt: ICanvasOpt = {
 };
 
 function Slider(props: IProps): JSX.Element {
-  const { onChange, text, value } = props;
+  const { onChange, text, value, type } = props;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasOpt, setCanvasOpt] = useState<ICanvasOpt>(initCanvasOpt);
   const [isRender, setIsRender] = useState<boolean>(false);
@@ -54,7 +55,7 @@ function Slider(props: IProps): JSX.Element {
       const { ctx, canvasW, canvasH } = canvasOpt;
       ctx.clearRect(0, 0, canvasW, canvasH);
       changeArc({ value });
-      console.log(value)
+      console.log(value);
     }
   }, [state.drawType]);
 
@@ -146,14 +147,16 @@ function Slider(props: IProps): JSX.Element {
 
   return (
     <div className={styles.sliderCanvas_wrap}>
-      {text ? text : ""}
+      {text || ""}
       <canvas
         ref={canvasRef}
         className={styles.sliderCanvas}
         width="100"
         height="10"
       ></canvas>
-      <span className={styles.rate_text}>{value}</span>
+      <span className={styles.rate_text}>
+        {type === "rotate" ? ((value || 0) * 3.6).toFixed(0) : value}
+      </span>
     </div>
   );
 }
