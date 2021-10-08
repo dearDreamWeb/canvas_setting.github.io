@@ -7,6 +7,92 @@ interface controlPointsItem {
     y: number
 }
 
+// const oCoords: any = {
+//     tl: {
+//       x: ltX,
+//       y: ltY
+//     },
+//     tr: {
+//       x: rtX,
+//       y: rtY
+//     },
+//     br: {
+//       x: rbX,
+//       y: rbY
+//     },
+//     bl: {
+//       x: lbX,
+//       y: lbY
+//     }
+//   };
+//   const point = {
+//     x: x2,
+//     y: y2
+//   };
+//   function lineBox(oCoords: any) {
+
+//     var lines: any = {
+//       topline: {
+//         o: oCoords.tl,
+//         d: oCoords.tr
+//       },
+//       rightline: {
+//         o: oCoords.tr,
+//         d: oCoords.br
+//       },
+//       bottomline: {
+//         o: oCoords.br,
+//         d: oCoords.bl
+//       },
+//       leftline: {
+//         o: oCoords.bl,
+//         d: oCoords.tl
+//       },
+//     };
+//     return lines;
+//   };
+//   let lines = lineBox(oCoords);
+// function pointBox(point: { y: number; x: number; }, lines: any) {
+
+//     var b1, b2, a1, a2, xi,
+//         xcount = 0,
+//         iLine;
+
+//     for (var lineKey in lines) {
+//         iLine = lines[lineKey];
+//         // optimisation 1: line below point. no cross
+//         if ((iLine.o.y < point.y) && (iLine.d.y < point.y)) {
+//             continue;
+//         }
+//         // optimisation 2: line above point. no cross
+//         if ((iLine.o.y >= point.y) && (iLine.d.y >= point.y)) {
+//             continue;
+//         }
+//         // optimisation 3: vertical line case
+//         if ((iLine.o.x === iLine.d.x) && (iLine.o.x >= point.x)) {
+//             xi = iLine.o.x;
+//         }
+//         // calculate the intersection point
+//         else {
+//             b1 = 0;
+//             b2 = (iLine.d.y - iLine.o.y) / (iLine.d.x - iLine.o.x);
+//             a1 = point.y - b1 * point.x;
+//             a2 = iLine.o.y - b2 * iLine.o.x;
+
+//             xi = -(a1 - a2) / (b1 - b2);
+//         }
+
+//         if (xi >= point.x) {
+//             xcount += 1;
+//         }
+//         // optimisation 4: specific for square images
+//         if (xcount === 2) {
+//             break;
+//         }
+//     }
+//     return xcount;
+// };
+
 // 绘制控制器的线段和点
 const drawControl = (ctx, controlPoints, x, y, width, height, realRotate, callback) => {
     ctx.save();
@@ -77,6 +163,7 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
     let isRectSelected = false;
     const realRotate = rotate * 3.6 * (Math.PI / 180);
     let selectedControl: null | number = null
+    let isDrag = false;
 
     // 判断是否点击中图形
     const isSelected = (e) => {
@@ -102,24 +189,25 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
         let isSelectedControl = false
         selectedControl = null
         const newControlPoints = controlPoints.map((itemPoints) => getEndPointByRotate([itemPoints.x, itemPoints.y], [x + width / 2, y + height / 2], realRotate))
-        newControlPoints.forEach((item) => {
+
+        newControlPoints.forEach((item, index) => {
             const lines: linesItem[] = []
 
             lines[0] = {
                 p1: getEndPointByRotate([item.x, item.y], [item.x + 5, item.y + 5], realRotate),
-                p2: getEndPointByRotate([item.x + 10, y], [item.x + 5, item.y + 5], realRotate),
+                p2: getEndPointByRotate([item.x + 10, item.y], [item.x + 5, item.y + 5], realRotate),
             };
             lines[1] = {
-                p1: getEndPointByRotate([item.x, item.y], [item.x+5, item.y+5], realRotate),
-                p2: getEndPointByRotate([item.x, item.y + 10], [item.x+5, item.y+5], realRotate),
+                p1: getEndPointByRotate([item.x, item.y], [item.x + 5, item.y + 5], realRotate),
+                p2: getEndPointByRotate([item.x, item.y + 10], [item.x + 5, item.y + 5], realRotate),
             };
             lines[2] = {
-                p1: getEndPointByRotate([item.x + 10, item.y], [item.x+5, item.y+5], realRotate),
-                p2: getEndPointByRotate([item.x + 10, item.y + 10], [item.x+5, item.y+5], realRotate),
+                p1: getEndPointByRotate([item.x + 10, item.y], [item.x + 5, item.y + 5], realRotate),
+                p2: getEndPointByRotate([item.x + 10, item.y + 10], [item.x + 5, item.y + 5], realRotate),
             };
             lines[3] = {
-                p1: getEndPointByRotate([item.x, item.y + 10], [item.x+5, item.y+5], realRotate),
-                p2: getEndPointByRotate([item.x + 10, item.y + 10], [item.x+5, item.y+5], realRotate),
+                p1: getEndPointByRotate([item.x, item.y + 10], [item.x + 5, item.y + 5], realRotate),
+                p2: getEndPointByRotate([item.x + 10, item.y + 10], [item.x + 5, item.y + 5], realRotate),
             };
             let count = 0;
             for (let i = 0; i < lines.length; i++) {
@@ -136,8 +224,13 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
                     }
                 }
             }
-            isSelectedControl = !(count % 2 === 0)
+
+            if (!(count % 2 === 0)) {
+                isSelectedControl = true
+                selectedControl = index
+            }
         })
+        console.log(selectedControl)
         return !(intersectionCount % 2 === 0) || isSelectedControl;
     }
 
@@ -155,27 +248,11 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
 
     canvasDom.onmousedown = (e) => {
         if (isSelected(e)) {
+            isDrag = true
             isRectSelected = true;
             drawRectBox(ctx, x, y, width, height, realRotate)
             drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
-            canvasDom.onmousemove = (e) => {
-                x += e.movementX
-                y += e.movementY
-
-                // ['tl', 'tr', 'bl', 'br', 'tc', 'bc', 'lc', 'rc', 'rp']
-                controlPoints[0] = { x: x - 5, y: y - 5 }
-                controlPoints[1] = { x: x + width - 5, y: y - 5 }
-                controlPoints[2] = { x: x - 5, y: y + height - 5 }
-                controlPoints[3] = { x: x + width - 5, y: y + height - 5 }
-                controlPoints[4] = { x: x + width / 2 - 5, y: y - 5 }
-                controlPoints[5] = { x: x + width / 2 - 5, y: y + height - 5 }
-                controlPoints[6] = { x: x - 5, y: y + height / 2 - 5 }
-                controlPoints[7] = { x: x + width - 5, y: y + height / 2 - 5 }
-                controlPoints[8] = { x: x + width / 2 - 5, y: y - 40 }
-                ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-                drawRectBox(ctx, x, y, width, height, realRotate)
-                drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
-            }
+            console.log(isDrag)
         } else {
             isRectSelected = false
             callback({ ...rectParams, isRectSelected })
@@ -183,13 +260,33 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
             drawRectBox(ctx, x, y, width, height, realRotate)
         }
         canvasDom.onmouseup = () => {
-            canvasDom.onmousemove = null;
+            isDrag = false
             drawRectBox(ctx, x, y, width, height, realRotate)
             if (isRectSelected) {
                 drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
             }
             callback({ ...rectParams, x, y, lines, controlPoints, isRectSelected })
         }
+    }
+    canvasDom.onmousemove = (e) => {
+        if (isDrag) {
+            x += e.movementX
+            y += e.movementY
+            // ['tl', 'tr', 'bl', 'br', 'tc', 'bc', 'lc', 'rc', 'rp']
+            controlPoints[0] = { x: x - 5, y: y - 5 }
+            controlPoints[1] = { x: x + width - 5, y: y - 5 }
+            controlPoints[2] = { x: x - 5, y: y + height - 5 }
+            controlPoints[3] = { x: x + width - 5, y: y + height - 5 }
+            controlPoints[4] = { x: x + width / 2 - 5, y: y - 5 }
+            controlPoints[5] = { x: x + width / 2 - 5, y: y + height - 5 }
+            controlPoints[6] = { x: x - 5, y: y + height / 2 - 5 }
+            controlPoints[7] = { x: x + width - 5, y: y + height / 2 - 5 }
+            controlPoints[8] = { x: x + width / 2 - 5, y: y - 40 }
+            ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+            drawRectBox(ctx, x, y, width, height, realRotate)
+            drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
+        }
+
     }
 
 }

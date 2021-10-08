@@ -63,6 +63,9 @@ function ShowPattern(): JSX.Element {
     const realRotate = rotate * 3.6 * (Math.PI / 180);
     const realOpacity = opacity * 0.01;
     ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+    canvasDom.onmousedown = null;
+    canvasDom.onmousemove = null;
+    canvasDom.onmouseup = null;
     canvasDom.removeEventListener("mousemove", eyeBallMove);
     canvasDom.addEventListener("mouseleave", () => {
       canvasDom.removeEventListener("mousemove", eyeBallMove);
@@ -154,7 +157,7 @@ function ShowPattern(): JSX.Element {
     if (state.drawType !== "0") {
       return;
     }
-    ctx.clearRect(0, 0, canvasDom.width, canvasDom.height)
+    ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
     drawRect(ctx, canvasDom, state, "", data =>
       dispatch({
         type: "changeRect",
