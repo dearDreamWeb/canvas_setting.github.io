@@ -4,13 +4,13 @@ interface linesItem {
 }
 interface ILines {
     // 上
-    topline: linesItem,
+    topLine: linesItem,
     // 左
-    leftline: linesItem,
+    leftLine: linesItem,
     // 右
-    rightline: linesItem,
+    rightLine: linesItem,
     // 下
-    bottomline: linesItem,
+    bottomLine: linesItem,
 }
 interface controlPointsItem {
     x: number;
@@ -189,47 +189,43 @@ const getCursorStyle = (canvasDom, index, realRotate) => {
 function lineBox(oCoords: any) {
 
     var lines: any = {
-        topline: {
+        topLine: {
             o: oCoords.tl,
             d: oCoords.tr
         },
-        rightline: {
+        rightLine: {
             o: oCoords.tr,
             d: oCoords.br
         },
-        bottomline: {
+        bottomLine: {
             o: oCoords.br,
             d: oCoords.bl
         },
-        leftline: {
+        leftLine: {
             o: oCoords.bl,
             d: oCoords.tl
         },
     };
     return lines;
 };
-// 判断是否在点击区域内，当为xcount为1时才是在点击区域
+// 判断是否在点击区域内，当为xCount为1时才是在点击区域
 function pointBox(point: { y: number; x: number; }, lines: any) {
 
     var b1, b2, a1, a2, xi,
-        xcount = 0,
+        xCount = 0,
         iLine;
 
     for (var lineKey in lines) {
         iLine = lines[lineKey];
-        // optimisation 1: line below point. no cross
         if ((iLine.o.y < point.y) && (iLine.d.y < point.y)) {
             continue;
         }
-        // optimisation 2: line above point. no cross
         if ((iLine.o.y >= point.y) && (iLine.d.y >= point.y)) {
             continue;
         }
-        // optimisation 3: vertical line case
         if ((iLine.o.x === iLine.d.x) && (iLine.o.x >= point.x)) {
             xi = iLine.o.x;
         }
-        // calculate the intersection point
         else {
             b1 = 0;
             b2 = (iLine.d.y - iLine.o.y) / (iLine.d.x - iLine.o.x);
@@ -240,15 +236,15 @@ function pointBox(point: { y: number; x: number; }, lines: any) {
         }
 
         if (xi >= point.x) {
-            xcount += 1;
+            xCount += 1;
         }
-        // optimisation 4: specific for square images
-        if (xcount === 2) {
+
+        if (xCount === 2) {
             break;
         }
     }
 
-    return xcount === 1;
+    return xCount === 1;
 };
 
 // 绘制控制器的线段和点
@@ -273,19 +269,19 @@ const drawControl = (ctx, controlPoints, x, y, width, height, realRotate, callba
     })
     let lines: any = {};
 
-    lines.topline = {
+    lines.topLine = {
         o: getEndPointByRotate([x, y], [x + width / 2, y + height / 2], realRotate),
         d: getEndPointByRotate([x + width, y], [x + width / 2, y + height / 2], realRotate),
     };
-    lines.leftline = {
+    lines.leftLine = {
         o: getEndPointByRotate([x, y], [x + width / 2, y + height / 2], realRotate),
         d: getEndPointByRotate([x, y + height], [x + width / 2, y + height / 2], realRotate),
     };
-    lines.rightline = {
+    lines.rightLine = {
         o: getEndPointByRotate([x + width, y], [x + width / 2, y + height / 2], realRotate),
         d: getEndPointByRotate([x + width, y + height], [x + width / 2, y + height / 2], realRotate),
     };
-    lines.bottomline = {
+    lines.bottomLine = {
         o: getEndPointByRotate([x, y + height], [x + width / 2, y + height / 2], realRotate),
         d: getEndPointByRotate([x + width, y + height], [x + width / 2, y + height / 2], realRotate),
     };
@@ -322,7 +318,6 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
     let { x, y, width, height } = rectParams;
     let isRectSelected = false;  // 是否选中
     const realRotate = rotate * 3.6 * (Math.PI / 180);
-    let selectedControl: null | number = null // 点击的控制点坐标
     let isDrag = false;
 
     // 判断是否点击中图形
@@ -334,7 +329,6 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
 
         // 是否点击了控制器
         let isSelectedControl = false
-        selectedControl = null
         const newControlPoints = controlPoints.map((itemPoints) => getEndPointByRotate([itemPoints.x, itemPoints.y], [x + width / 2, y + height / 2], realRotate))
         newControlPoints.forEach((item, index) => {
             const oCoords = {
@@ -347,7 +341,6 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
 
             if (pointBox({ x: eventX, y: eventY }, lines)) {
                 isSelectedControl = true;
-                selectedControl = index
             }
         })
 
@@ -357,6 +350,7 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
     if (type === 'rotate') {
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
         drawRectBox(ctx, x, y, width, height, realRotate)
+        isRectSelected = true
         if (rectParams.isRectSelected) {
             drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
         }
@@ -396,6 +390,7 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
         }
     }
     canvasDom.onmousemove = (e) => {
+
         if (isDrag) {
             x += e.movementX
             y += e.movementY

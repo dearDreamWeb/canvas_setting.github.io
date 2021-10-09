@@ -37,22 +37,22 @@ const initData = {
         },
         lines: {
             // 上
-            topline: {
+            topLine: {
                 o: { x: 50, y: 50 },
                 d: { x: 150, y: 50 },
             },
             // 左
-            leftline: {
+            leftLine: {
                 o: { x: 50, y: 50 },
                 d: { x: 50, y: 150 },
             },
             // 右
-            rightline: {
+            rightLine: {
                 o: { x: 150, y: 50 },
                 d: { x: 150, y: 150 },
             },
             // 下
-            bottomline: {
+            bottomLine: {
                 o: { x: 50, y: 150 },
                 d: { x: 150, y: 150 },
             },
@@ -73,15 +73,6 @@ const initData = {
         isRectSelected: false
     }
 };
-
-interface linesItem {
-    p1: controlPointsItem
-    p2: controlPointsItem
-}
-interface controlPointsItem {
-    x: number;
-    y: number
-}
 
 // 派发事件
 const reducer = (state, action) => {

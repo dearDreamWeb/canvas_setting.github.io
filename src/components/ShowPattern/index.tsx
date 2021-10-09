@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useRef, useEffect, useContext, useState } from "react";
 import styles from "./index.module.scss";
 import { ContextData } from "../../globalState";
@@ -96,7 +97,6 @@ function ShowPattern(): JSX.Element {
     ctx.translate(canvasDom.width / 2, canvasDom.height / 2);
     ctx.scale(realScale, realScale);
     ctx.rotate(realRotate);
-
     switch (drawType) {
       case "reset":
         ctx.rotate((Math.PI / 180) * -realRotate);
@@ -404,7 +404,7 @@ function ShowPattern(): JSX.Element {
    * 绘制哆啦A梦
    */
   const drawDuola = (ctx, eyeBallX, eyeBallY) => {
-    ctx.clearRect(0, 0, canvasRef.current.wdith, canvasRef.current.height);
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     // 绘制阴影
     ctx.shadowColor = "rgba(0,0,0,0)";
 
@@ -546,12 +546,10 @@ function ShowPattern(): JSX.Element {
     const vsShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vsShader, vs);
     gl.compileShader(vsShader);
-    let success = gl.getShaderParameter(vsShader, gl.COMPILE_STATUS);
 
     const fsShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fsShader, fs);
     gl.compileShader(fsShader);
-    let success1 = gl.getShaderParameter(fsShader, gl.COMPILE_STATUS);
 
     const program = gl.createProgram();
     gl.attachShader(program, vsShader);

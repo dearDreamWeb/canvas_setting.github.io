@@ -1,8 +1,7 @@
-import React, { useEffect, useReducer } from "react";
+import React, { useReducer } from "react";
 import styles from "./index.module.scss";
-import Slider from "../../commponets/Slider";
-import CanvasSetting from "../../commponets/CanvasSetting";
-import ShowPattern from "../../commponets/ShowPattern";
+import CanvasSetting from "../../components/CanvasSetting";
+import ShowPattern from "../../components/ShowPattern";
 import { reducer, ContextData, initData } from "../../globalState"; //引入useReducer文件
 
 const menuList = [
@@ -71,7 +70,7 @@ function App(): JSX.Element {
                 <li
                   key={item.key}
                   className={`${styles.menu_item} ${
-                    item.key === state.drawType ? styles.menu_item_acitve : ""
+                    item.key === state.drawType ? styles.menu_item_active : ""
                   }`}
                   onClick={() =>
                     dispatch({
