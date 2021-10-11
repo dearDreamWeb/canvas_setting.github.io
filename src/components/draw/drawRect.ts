@@ -17,7 +17,9 @@ interface controlPointsItem {
     y: number
 }
 
-// 判断鼠标样式
+/**
+ * 判断鼠标样式
+ */
 const getCursorStyle = (canvasDom, index, realRotate) => {
     let cursorStyle = '';
     const rotate = realRotate * 180 / Math.PI;
@@ -185,7 +187,9 @@ const getCursorStyle = (canvasDom, index, realRotate) => {
     canvasDom.style.cursor = cursorStyle;
 }
 
-// 获取线段
+/**
+ * 获取线段
+ */
 function lineBox(oCoords: any) {
 
     var lines: any = {
@@ -208,7 +212,9 @@ function lineBox(oCoords: any) {
     };
     return lines;
 };
-// 判断是否在点击区域内，当为xCount为1时才是在点击区域
+/**
+ * 判断是否在点击区域内，当为xCount为1时才是在点击区域
+ */
 function pointBox(point: { y: number; x: number; }, lines: any) {
 
     var b1, b2, a1, a2, xi,
@@ -247,7 +253,9 @@ function pointBox(point: { y: number; x: number; }, lines: any) {
     return xCount === 1;
 };
 
-// 绘制控制器的线段和点
+/**
+ * 绘制控制器的线段和点
+ */
 const drawControl = (ctx, controlPoints, x, y, width, height, realRotate, callback) => {
     ctx.save();
     ctx.translate(x + width / 2, y + height / 2);
@@ -289,7 +297,9 @@ const drawControl = (ctx, controlPoints, x, y, width, height, realRotate, callba
     callback(lines, newControlPoints)
 }
 
-// 绘制矩形
+/**
+ * 绘制矩形
+ */
 const drawRectBox = (ctx, x, y, width, height, realRotate) => {
     ctx.save();
     ctx.fillStyle = '#000';
@@ -300,7 +310,9 @@ const drawRectBox = (ctx, x, y, width, height, realRotate) => {
     ctx.restore();
 }
 
-// 得到控制点旋转之后的坐标
+/**
+ * 得到控制点旋转之后的坐标
+ */
 const getEndPointByRotate = (startPoint: number[], centerPoint: number[], angle: number) => {
     const [centerX, centerY] = centerPoint;
     const [x1, y1] = [startPoint[0] - centerX, startPoint[1] - centerY];
@@ -308,6 +320,49 @@ const getEndPointByRotate = (startPoint: number[], centerPoint: number[], angle:
     const y2 = x1 * Math.sin(angle) + y1 * Math.cos(angle);
     return { x: x2 + centerX, y: y2 + centerY };
 }
+
+/**
+ * 获取点击控制器的坐标
+ */
+const getControlIndex = (e, canvasDom, controlPoints, realRotate, x, y, width, height) => {
+    let i = null;
+    let eventX = Math.floor(e.clientX - canvasDom.getBoundingClientRect().left);
+    let eventY = Math.floor(e.clientY - canvasDom.getBoundingClientRect().top);
+    const newControlPoints = controlPoints.map((itemPoints) => getEndPointByRotate([itemPoints.x, itemPoints.y], [x + width / 2, y + height / 2], realRotate))
+    newControlPoints.forEach((item, index) => {
+        const oCoords = {
+            tl: getEndPointByRotate([item.x, item.y], [item.x, item.y], realRotate),
+            tr: getEndPointByRotate([item.x + 10, item.y], [item.x, item.y], realRotate),
+            br: getEndPointByRotate([item.x + 10, item.y + 10], [item.x, item.y], realRotate),
+            bl: getEndPointByRotate([item.x, item.y + 10], [item.x, item.y], realRotate),
+        };
+        const lines = lineBox(oCoords);
+
+        if (pointBox({ x: eventX, y: eventY }, lines)) {
+            i = index;
+        }
+    })
+    getCursorStyle(canvasDom, i, realRotate);
+    return i
+}
+
+/**
+ * 判断控制点在第几象限
+ */
+const getQuadrant = (x, y, centerX, centerY): number => {
+    let quadrantIndex = 0;
+    if (x <= centerX && y <= centerY) {
+        quadrantIndex = 0;
+    } else if (x >= centerX && y <= centerY) {
+        quadrantIndex = 1;
+    } else if (x <= centerX && y >= centerY) {
+        quadrantIndex = 2;
+    } else if (x >= centerX && y >= centerY) {
+        quadrantIndex = 3;
+    }
+    return quadrantIndex
+}
+
 
 const useDrawRect = (ctx, canvasDom, state, type, callback) => {
     ctx.restore();
@@ -317,8 +372,10 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
     let controlPoints: controlPointsItem[] = rectParams.controlPoints
     let { x, y, width, height } = rectParams;
     let isRectSelected = false;  // 是否选中
-    const realRotate = rotate * 3.6 * (Math.PI / 180);
+    let realRotate = rotate * 3.6 * (Math.PI / 180);
     let isDrag = false;
+    let controlIndex: null | number = null; // 控制器坐标
+    let isScale: boolean = false;
 
     // 判断是否点击中图形
     const isSelected = (e) => {
@@ -362,35 +419,80 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
 
     canvasDom.onmousedown = (e) => {
         if (isSelected(e)) {
-            isDrag = true
+            controlIndex = getControlIndex(e, canvasDom, controlPoints, realRotate, x, y, width, height)
+            // 如果鼠标没在控制点上就允许拖拽
+            isDrag = controlIndex === null;
+            isScale = controlIndex !== null;
             isRectSelected = true;
-            drawRectBox(ctx, x, y, width, height, realRotate)
-            drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
-
+            drawRectBox(ctx, x, y, width, height, realRotate);
+            drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data);
         } else {
-            isRectSelected = false
-            callback({ ...rectParams, isRectSelected })
-            ctx.clearRect(0, 0, canvasDom.width, canvasDom.height)
-            drawRectBox(ctx, x, y, width, height, realRotate)
+            isRectSelected = false;
+            callback({ ...rectParams, isRectSelected });
+            ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+            drawRectBox(ctx, x, y, width, height, realRotate);
         }
-        canvasDom.onmouseup = () => {
-            isDrag = false
-            drawRectBox(ctx, x, y, width, height, realRotate)
-            if (isRectSelected) {
-                drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
-            }
+    }
+    canvasDom.onmouseup = () => {
+        isDrag = false
+        isScale = false
+        drawRectBox(ctx, x, y, width, height, realRotate)
+        if (isRectSelected) {
+            drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
+        }
 
-            oCoords = {
-                tl: getEndPointByRotate([x, y], [x + width / 2, y + height / 2], realRotate),
-                tr: getEndPointByRotate([x + width, y], [x + width / 2, y + height / 2], realRotate),
-                br: getEndPointByRotate([x + width, y + height], [x + width / 2, y + height / 2], realRotate),
-                bl: getEndPointByRotate([x, y + height], [x + width / 2, y + height / 2], realRotate),
-            }
-            callback({ ...rectParams, x, y, lines, controlPoints, isRectSelected, oCoords })
+        oCoords = {
+            tl: getEndPointByRotate([x, y], [x + width / 2, y + height / 2], realRotate),
+            tr: getEndPointByRotate([x + width, y], [x + width / 2, y + height / 2], realRotate),
+            br: getEndPointByRotate([x + width, y + height], [x + width / 2, y + height / 2], realRotate),
+            bl: getEndPointByRotate([x, y + height], [x + width / 2, y + height / 2], realRotate),
+        }
+        if (controlIndex! === 8) {
+            callback({ ...rectParams, x, y, lines, controlPoints, isRectSelected, oCoords, width, height }, { rotate: realRotate })
+        } else {
+            callback({ ...rectParams, x, y, lines, controlPoints, isRectSelected, oCoords, width, height })
         }
     }
     canvasDom.onmousemove = (e) => {
+        if (isScale) {
+            if (controlIndex! < 4) {
+                const centerX = x + width / 2;
+                const centerY = y + height / 2;
+                const x1 = x;
+                const y1 = y;
+                const x2 = e.offsetX;
+                const y2 = e.offsetY;
+                const scaleStart = Math.abs(centerX - x1) + Math.abs(centerY - y1);
+                const scaleEnd = Math.abs(centerX - x2) + Math.abs(centerY - y2);
+                const scale = scaleStart / scaleEnd;
+                x = x - (1 - scale) / 2 * width;
+                y = y - (1 - scale) / 2 * height;
+                width += (1 - scale) * width;
+                height += (1 - scale) * height;
 
+                // ['tl', 'tr', 'bl', 'br', 'tc', 'bc', 'lc', 'rc', 'rp']
+                controlPoints[0] = { x: x - 5, y: y - 5 }
+                controlPoints[1] = { x: x + width - 5, y: y - 5 }
+                controlPoints[2] = { x: x - 5, y: y + height - 5 }
+                controlPoints[3] = { x: x + width - 5, y: y + height - 5 }
+                controlPoints[4] = { x: x + width / 2 - 5, y: y - 5 }
+                controlPoints[5] = { x: x + width / 2 - 5, y: y + height - 5 }
+                controlPoints[6] = { x: x - 5, y: y + height / 2 - 5 }
+                controlPoints[7] = { x: x + width - 5, y: y + height / 2 - 5 }
+                controlPoints[8] = { x: x + width / 2 - 5, y: y - 40 }
+                ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+                drawRectBox(ctx, x, y, width, height, realRotate)
+                drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
+            } else if (controlIndex! === 8) {
+                const centerX = x + width / 2;
+                const centerY = y + height / 2;
+                realRotate = ((Math.atan2(e.offsetY - centerY, e.offsetX - centerX) / (Math.PI / 180)) + 90) % 360;
+                ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+                drawRectBox(ctx, x, y, width, height, realRotate)
+                isRectSelected = true
+                drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
+            }
+        }
         if (isDrag) {
             x += e.movementX
             y += e.movementY
@@ -407,30 +509,12 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
             ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
             drawRectBox(ctx, x, y, width, height, realRotate)
             drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
-        }
-        let controlIndex: null | number = null
+        };
+
         if (isRectSelected) {
-            let eventX = Math.floor(e.clientX - canvasDom.getBoundingClientRect().left);
-            let eventY = Math.floor(e.clientY - canvasDom.getBoundingClientRect().top);
-            const newControlPoints = controlPoints.map((itemPoints) => getEndPointByRotate([itemPoints.x, itemPoints.y], [x + width / 2, y + height / 2], realRotate))
-            newControlPoints.forEach((item, index) => {
-                const oCoords = {
-                    tl: getEndPointByRotate([item.x, item.y], [item.x, item.y], realRotate),
-                    tr: getEndPointByRotate([item.x + 10, item.y], [item.x, item.y], realRotate),
-                    br: getEndPointByRotate([item.x + 10, item.y + 10], [item.x, item.y], realRotate),
-                    bl: getEndPointByRotate([item.x, item.y + 10], [item.x, item.y], realRotate),
-                }
-                const lines = lineBox(oCoords);
-
-                if (pointBox({ x: eventX, y: eventY }, lines)) {
-                    controlIndex = index
-                }
-            })
-            getCursorStyle(canvasDom, controlIndex, realRotate)
+            getControlIndex(e, canvasDom, controlPoints, realRotate, x, y, width, height)
         }
-
     }
-
 }
 
 export default useDrawRect

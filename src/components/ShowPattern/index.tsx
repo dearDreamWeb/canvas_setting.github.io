@@ -158,12 +158,24 @@ function ShowPattern(): JSX.Element {
       return;
     }
     ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-    drawRect(ctx, canvasDom, state, "", data =>
+    drawRect(ctx, canvasDom, state, "", (rectParams, rotateData) => {
       dispatch({
         type: "changeRect",
-        data,
-      })
-    );
+        data: rectParams,
+      });
+
+      if (
+        rotateData &&
+        "rotate" in rotateData &&
+        typeof rotateData.rotate === "number"
+      ) {
+        console.log(rotateData);
+        dispatch({
+          type: "changeState",
+          data: rotateData,
+        });
+      }
+    });
   }, [state.drawType]);
 
   useEffect(() => {
@@ -331,7 +343,7 @@ function ShowPattern(): JSX.Element {
         imgW * realScale,
         imgH * realScale
       );
-      // ctx.fillRect(0, 0, width, height);
+
       ctx.restore();
     };
   };
