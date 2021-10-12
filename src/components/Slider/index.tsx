@@ -40,15 +40,16 @@ function Slider(props: IProps): JSX.Element {
 
   useEffect(() => {
     if (value && canvasOpt.canvasDom) {
-      setIsRender(true);
+      // setIsRender(true);
+      changeArc({ value });
     }
   }, [canvasOpt, value]);
 
-  useEffect(() => {
-    if (value && isRender) {
-      changeArc({ value });
-    }
-  }, [isRender]);
+  // useEffect(() => {
+  //   if (value && isRender) {
+  //     changeArc({ value });
+  //   }
+  // }, [isRender]);
 
   useEffect(() => {
     if (state.drawType === "reset") {

@@ -169,7 +169,6 @@ function ShowPattern(): JSX.Element {
         "rotate" in rotateData &&
         typeof rotateData.rotate === "number"
       ) {
-        console.log(rotateData);
         dispatch({
           type: "changeState",
           data: rotateData,
@@ -187,12 +186,23 @@ function ShowPattern(): JSX.Element {
     if (state.drawType !== "0") {
       return;
     }
-    drawRect(ctx, canvasDom, state, "rotate", data =>
+    drawRect(ctx, canvasDom, state, "rotate", (rectParams, rotateData) => {
       dispatch({
         type: "changeRect",
-        data,
-      })
-    );
+        data: rectParams,
+      });
+
+      if (
+        rotateData &&
+        "rotate" in rotateData &&
+        typeof rotateData.rotate === "number"
+      ) {
+        dispatch({
+          type: "changeState",
+          data: rotateData,
+        });
+      }
+    });
   }, [state.rotate]);
 
   useEffect(() => {

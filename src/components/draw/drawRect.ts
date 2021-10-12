@@ -264,6 +264,7 @@ const drawControl = (ctx, controlPoints, x, y, width, height, realRotate, callba
     ctx.strokeStyle = '#f40';
     ctx.strokeRect(x, y, width, height)
     ctx.restore()
+    ctx.save();
     const newControlPoints = controlPoints.map((itemPoints) => getEndPointByRotate([itemPoints.x, itemPoints.y], [x + width / 2, y + height / 2], realRotate))
     ctx.strokeStyle = '#f40';
     ctx.fillStyle = '#f40';
@@ -293,7 +294,7 @@ const drawControl = (ctx, controlPoints, x, y, width, height, realRotate, callba
         o: getEndPointByRotate([x, y + height], [x + width / 2, y + height / 2], realRotate),
         d: getEndPointByRotate([x + width, y + height], [x + width / 2, y + height / 2], realRotate),
     };
-
+    ctx.restore()
     callback(lines, newControlPoints)
 }
 
@@ -416,7 +417,9 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
         ctx.fillRect(rectParams.x, rectParams.y, rectParams.width, rectParams.height);
         ctx.restore()
     }
-
+    canvasDom.onmousedown = null;
+    canvasDom.onmouseup = null;
+    canvasDom.onmousemove = null;
     canvasDom.onmousedown = (e) => {
         if (isSelected(e)) {
             controlIndex = getControlIndex(e, canvasDom, controlPoints, realRotate, x, y, width, height)
@@ -447,12 +450,14 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
             br: getEndPointByRotate([x + width, y + height], [x + width / 2, y + height / 2], realRotate),
             bl: getEndPointByRotate([x, y + height], [x + width / 2, y + height / 2], realRotate),
         }
+
         if (controlIndex! === 8) {
-            callback({ ...rectParams, x, y, lines, controlPoints, isRectSelected, oCoords, width, height }, { rotate: realRotate })
+            callback({ ...rectParams, x, y, lines, controlPoints, isRectSelected, oCoords, width, height }, { rotate: Number((realRotate * 180 / Math.PI / 3.6).toFixed(0)) })
         } else {
             callback({ ...rectParams, x, y, lines, controlPoints, isRectSelected, oCoords, width, height })
         }
     }
+
     canvasDom.onmousemove = (e) => {
         if (isScale) {
             if (controlIndex! < 4) {
@@ -462,9 +467,10 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
                 const y1 = y;
                 const x2 = e.offsetX;
                 const y2 = e.offsetY;
-                const scaleStart = Math.abs(centerX - x1) + Math.abs(centerY - y1);
-                const scaleEnd = Math.abs(centerX - x2) + Math.abs(centerY - y2);
+                const scaleStart = Math.sqrt(Math.pow(centerX - x1, 2) + Math.pow(centerY - y1, 2));
+                const scaleEnd = Math.sqrt(Math.pow(centerX - x2, 2) + Math.pow(centerY - y2, 2));
                 const scale = scaleStart / scaleEnd;
+
                 x = x - (1 - scale) / 2 * width;
                 y = y - (1 - scale) / 2 * height;
                 width += (1 - scale) * width;
@@ -481,15 +487,16 @@ const useDrawRect = (ctx, canvasDom, state, type, callback) => {
                 controlPoints[7] = { x: x + width - 5, y: y + height / 2 - 5 }
                 controlPoints[8] = { x: x + width / 2 - 5, y: y - 40 }
                 ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+
                 drawRectBox(ctx, x, y, width, height, realRotate)
                 drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
             } else if (controlIndex! === 8) {
                 const centerX = x + width / 2;
                 const centerY = y + height / 2;
-                realRotate = ((Math.atan2(e.offsetY - centerY, e.offsetX - centerX) / (Math.PI / 180)) + 90) % 360;
+                realRotate = Math.PI / 180 * ((Math.atan2(e.offsetX - centerX, e.offsetY - centerY) / Math.PI * -180 + 180) % 360);
                 ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-                drawRectBox(ctx, x, y, width, height, realRotate)
                 isRectSelected = true
+                drawRectBox(ctx, x, y, width, height, realRotate)
                 drawControl(ctx, controlPoints, x, y, width, height, realRotate, (data) => lines = data)
             }
         }
