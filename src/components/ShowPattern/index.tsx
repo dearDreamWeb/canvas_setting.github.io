@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useContext, useState } from "react";
 import styles from "./index.module.scss";
 import { ContextData } from "../../globalState";
 import drawRect from "../draw/drawRect";
+import drawTree from "../drawTree/drawTree";
 
 function ShowPattern(): JSX.Element {
   const canvasWrapRef = useRef<any>(null);
@@ -139,6 +140,9 @@ function ShowPattern(): JSX.Element {
           originX,
           originY
         );
+        break;
+      case "11":
+        drawTree(ctx, canvasDom);
         break;
       default:
         pointsArr = [];
