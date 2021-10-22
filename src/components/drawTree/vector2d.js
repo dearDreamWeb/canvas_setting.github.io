@@ -58,7 +58,8 @@ export default class Vector2D extends Array {
   }
 
   normalize() {
-    return this.scale(1 / this.length);
+    const length = Math.hypot(this.x, this.y)
+    return this.scale(1 / length);
   }
 
   rotate(rad) {
