@@ -53,6 +53,10 @@ const menuList = [
     key: "11",
     text: "绘制树",
   },
+  {
+    key: "12",
+    text: "性能检测",
+  },
 ];
 
 function App(): JSX.Element {

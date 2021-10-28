@@ -16,6 +16,7 @@ const drawTree = (ctx, canvasDom) => {
 
 // 距离
 const computedDistance = (ctx, canvasDom) => {
+    // https://xcsf.github.io/blog/2020/06/12/%E8%AE%A1%E7%AE%97%E7%82%B9%E5%88%B0%E7%BA%BF%E6%AE%B5%E6%9C%80%E7%9F%AD%E8%B7%9D%E7%A6%BB-%E7%9F%A2%E9%87%8F%E6%B3%95/
     ctx.save()
     // 斜率
     const k = -2;
@@ -142,7 +143,6 @@ const scanHandler = (ctx, canvasDom) => {
 const drawBranch = (ctx, v0, length, thickness, dir, bias) => {
     const v = new Vector2D().rotate(dir).scale(length);
     const v1 = v0.copy().add(v);
-    console.log(v0, v1, dir, length)
     ctx.lineWidth = thickness;
     ctx.beginPath();
     ctx.moveTo(...v0);

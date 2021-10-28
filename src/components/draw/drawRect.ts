@@ -347,24 +347,6 @@ const getControlIndex = (e, canvasDom, controlPoints, realRotate, x, y, width, h
     return i
 }
 
-/**
- * 判断控制点在第几象限
- */
-const getQuadrant = (x, y, centerX, centerY): number => {
-    let quadrantIndex = 0;
-    if (x <= centerX && y <= centerY) {
-        quadrantIndex = 0;
-    } else if (x >= centerX && y <= centerY) {
-        quadrantIndex = 1;
-    } else if (x <= centerX && y >= centerY) {
-        quadrantIndex = 2;
-    } else if (x >= centerX && y >= centerY) {
-        quadrantIndex = 3;
-    }
-    return quadrantIndex
-}
-
-
 const useDrawRect = (ctx, canvasDom, state, type, callback) => {
     ctx.restore();
     const { rectParams, rotate } = state

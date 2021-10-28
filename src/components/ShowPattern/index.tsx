@@ -1,15 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useRef, useEffect, useContext, useState } from "react";
-import styles from "./index.module.scss";
-import { ContextData } from "../../globalState";
-import drawRect from "../draw/drawRect";
-import drawTree from "../drawTree/drawTree";
+import React, { useRef, useEffect, useContext, useState } from 'react';
+import styles from './index.module.scss';
+import { ContextData } from '../../globalState';
+import drawRect from '../draw/drawRect';
+import drawTree from '../drawTree/drawTree';
+import performanceTest from './drawUtils/performanceTest';
 
 function ShowPattern(): JSX.Element {
   const canvasWrapRef = useRef<any>(null);
   const canvasRef = useRef<any>(null);
   const webglRef = useRef<any>(null);
   const [showCanvas, setShowCanvas] = useState(true);
+  const rafId = useRef<number>();
 
   let pointsArr: number[] = [];
 
@@ -32,11 +34,11 @@ function ShowPattern(): JSX.Element {
 
   //   canvas配置改变时绘图
   useEffect(() => {
-    if (!state.drawType || state.drawType === "0") {
+    if (!state.drawType || state.drawType === '0') {
       return;
     }
     const canvasDom = canvasRef.current;
-    const ctx = canvasDom.getContext("2d");
+    const ctx = canvasDom.getContext('2d');
     const {
       drawType,
       fillColor,
@@ -64,13 +66,14 @@ function ShowPattern(): JSX.Element {
     const realScale = scale * 0.02;
     const realRotate = rotate * 3.6 * (Math.PI / 180);
     const realOpacity = opacity * 0.01;
+    cancelAnimationFrame(rafId.current || 0);
     ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
     canvasDom.onmousedown = null;
     canvasDom.onmousemove = null;
     canvasDom.onmouseup = null;
-    canvasDom.removeEventListener("mousemove", eyeBallMove);
-    canvasDom.addEventListener("mouseleave", () => {
-      canvasDom.removeEventListener("mousemove", eyeBallMove);
+    canvasDom.removeEventListener('mousemove', eyeBallMove);
+    canvasDom.addEventListener('mouseleave', () => {
+      canvasDom.removeEventListener('mousemove', eyeBallMove);
     });
     webglRef.current.onclick = null;
     setShowCanvas(true);
@@ -89,7 +92,7 @@ function ShowPattern(): JSX.Element {
     // lineWidth明明是设置线宽，最小只能到1
     ctx.lineWidth = lineW === 0 ? 1 : lineW;
     // 实线和虚线切换
-    if (lineType === "dash") {
+    if (lineType === 'dash') {
       ctx.setLineDash([3]); // [实线长度, 间隙长度]
       ctx.lineDashOffset = 0;
     } else {
@@ -99,36 +102,36 @@ function ShowPattern(): JSX.Element {
     ctx.scale(realScale, realScale);
     ctx.rotate(realRotate);
     switch (drawType) {
-      case "reset":
+      case 'reset':
         ctx.rotate((Math.PI / 180) * -realRotate);
         ctx.translate(-canvasDom.width / 2, -canvasDom.height / 2);
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
         break;
-      case "1":
+      case '1':
         drawTriangle(ctx);
         break;
-      case "2":
+      case '2':
         drawLine(ctx);
         break;
-      case "3":
+      case '3':
         drawArc(ctx);
         break;
-      case "4":
+      case '4':
         drawText(ctx, textInput, fontSize, textAlign, textBaseline, textDir);
         break;
-      case "5":
+      case '5':
         ctx.restore();
-        canvasDom.removeEventListener("mousemove", eyeBallMove);
-        canvasDom.addEventListener("mousemove", eyeBallMove);
+        canvasDom.removeEventListener('mousemove', eyeBallMove);
+        canvasDom.addEventListener('mousemove', eyeBallMove);
         drawDuola(ctx, eyePosition.eyeBallX, eyePosition.eyeBallY);
         break;
-      case "8":
+      case '8':
         drawQuadratic(ctx);
         break;
-      case "9":
+      case '9':
         drawBezier(ctx);
         break;
-      case "10":
+      case '10':
         drawImageHandler(
           ctx,
           canvasDom,
@@ -141,8 +144,13 @@ function ShowPattern(): JSX.Element {
           originY
         );
         break;
-      case "11":
+      case '11':
         drawTree(ctx, canvasDom);
+        break;
+      case '12':
+        performanceTest(ctx, canvasDom, ({ newRafId }) => {
+          rafId.current = newRafId;
+        });
         break;
       default:
         pointsArr = [];
@@ -157,24 +165,24 @@ function ShowPattern(): JSX.Element {
       return;
     }
     const canvasDom = canvasRef.current;
-    const ctx = canvasDom.getContext("2d");
-    if (state.drawType !== "0") {
+    const ctx = canvasDom.getContext('2d');
+    if (state.drawType !== '0') {
       return;
     }
     ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-    drawRect(ctx, canvasDom, state, "", (rectParams, rotateData) => {
+    drawRect(ctx, canvasDom, state, '', (rectParams, rotateData) => {
       dispatch({
-        type: "changeRect",
+        type: 'changeRect',
         data: rectParams,
       });
 
       if (
         rotateData &&
-        "rotate" in rotateData &&
-        typeof rotateData.rotate === "number"
+        'rotate' in rotateData &&
+        typeof rotateData.rotate === 'number'
       ) {
         dispatch({
-          type: "changeState",
+          type: 'changeState',
           data: rotateData,
         });
       }
@@ -186,23 +194,23 @@ function ShowPattern(): JSX.Element {
       return;
     }
     const canvasDom = canvasRef.current;
-    const ctx = canvasDom.getContext("2d");
-    if (state.drawType !== "0") {
+    const ctx = canvasDom.getContext('2d');
+    if (state.drawType !== '0') {
       return;
     }
-    drawRect(ctx, canvasDom, state, "rotate", (rectParams, rotateData) => {
+    drawRect(ctx, canvasDom, state, 'rotate', (rectParams, rotateData) => {
       dispatch({
-        type: "changeRect",
+        type: 'changeRect',
         data: rectParams,
       });
 
       if (
         rotateData &&
-        "rotate" in rotateData &&
-        typeof rotateData.rotate === "number"
+        'rotate' in rotateData &&
+        typeof rotateData.rotate === 'number'
       ) {
         dispatch({
-          type: "changeState",
+          type: 'changeState',
           data: rotateData,
         });
       }
@@ -213,14 +221,14 @@ function ShowPattern(): JSX.Element {
     const { drawType } = state;
     if (!showCanvas) {
       const webgl = webglRef.current;
-      const gl = webgl.getContext("webgl");
+      const gl = webgl.getContext('webgl');
       gl.clear(gl.COLOR_BUFFER_BIT);
       switch (drawType) {
-        case "6":
+        case '6':
           gl.clear(gl.COLOR_BUFFER_BIT);
           webglDraw(gl);
           break;
-        case "7":
+        case '7':
           gl.clear(gl.COLOR_BUFFER_BIT);
           webglRef.current.onclick = null;
           webglRef.current.onclick = e => webglClickDraw(e, gl);
@@ -401,7 +409,7 @@ function ShowPattern(): JSX.Element {
           clearInterval(_timer);
         }
 
-        let ctx = canvasRef.current.getContext("2d");
+        let ctx = canvasRef.current.getContext('2d');
 
         newEyePosition.eyeBallX += eyeBallSpeedX;
         newEyePosition.eyeBallY += eyeBallSpeedY;
@@ -432,13 +440,13 @@ function ShowPattern(): JSX.Element {
   const drawDuola = (ctx, eyeBallX, eyeBallY) => {
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     // 绘制阴影
-    ctx.shadowColor = "rgba(0,0,0,0)";
+    ctx.shadowColor = 'rgba(0,0,0,0)';
 
     ctx.lineWidth = 3;
     // 蓝脸
     ctx.beginPath();
     ctx.arc(500, 300, 150, Math.PI * 0.8, Math.PI * 2.2);
-    ctx.fillStyle = "#00a0de";
+    ctx.fillStyle = '#00a0de';
     ctx.fill();
     ctx.closePath();
     ctx.stroke();
@@ -446,7 +454,7 @@ function ShowPattern(): JSX.Element {
     // 白脸
     ctx.beginPath();
     ctx.arc(500, 324, 110, Math.PI * 0.8, Math.PI * 2.2);
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = '#fff';
     ctx.fill();
     ctx.closePath();
     ctx.stroke();
@@ -454,7 +462,7 @@ function ShowPattern(): JSX.Element {
     // 左眼
     ctx.beginPath();
     ctx.ellipse(472, 220, 40, 30, Math.PI * 0.5, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = '#fff';
     ctx.fill();
     ctx.closePath();
     ctx.stroke();
@@ -462,7 +470,7 @@ function ShowPattern(): JSX.Element {
     // 右眼
     ctx.beginPath();
     ctx.ellipse(532, 220, 40, 30, Math.PI * 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = '#fff';
     ctx.fill();
     ctx.closePath();
     ctx.stroke();
@@ -470,13 +478,13 @@ function ShowPattern(): JSX.Element {
     // 左眼球
     ctx.beginPath();
     ctx.arc(eyeBallX, eyeBallY, 14, 0, Math.PI * 2);
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = '#000';
     ctx.fill();
     ctx.stroke();
 
     ctx.beginPath();
     ctx.arc(eyeBallX + 5, eyeBallY + 5, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = '#fff';
     ctx.fill();
     ctx.closePath();
     ctx.stroke();
@@ -491,7 +499,7 @@ function ShowPattern(): JSX.Element {
     // 鼻子
     ctx.beginPath();
     ctx.arc(502, 265, 18, 0, Math.PI * 2);
-    ctx.fillStyle = "#e70010";
+    ctx.fillStyle = '#e70010';
     ctx.fill();
     ctx.closePath();
     ctx.stroke();
@@ -542,9 +550,9 @@ function ShowPattern(): JSX.Element {
 
     // 脖子
     ctx.beginPath();
-    ctx.lineCap = "round";
+    ctx.lineCap = 'round';
     ctx.lineWidth = 1;
-    ctx.fillStyle = "#e70010";
+    ctx.fillStyle = '#e70010';
     ctx.moveTo(370, 389);
     ctx.lineTo(630, 389);
     ctx.lineTo(630, 405);
@@ -626,7 +634,7 @@ function ShowPattern(): JSX.Element {
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(point), gl.STATIC_DRAW);
 
-    const a_position = gl.getAttribLocation(program, "a_position");
+    const a_position = gl.getAttribLocation(program, 'a_position');
     gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_position);
     gl.drawArrays(gl.POINTS, 0, point.length / 2);
@@ -638,7 +646,7 @@ function ShowPattern(): JSX.Element {
       <canvas
         ref={webglRef}
         className={styles.webgl_canvas}
-        style={{ display: showCanvas ? "none" : "block" }}
+        style={{ display: showCanvas ? 'none' : 'block' }}
       ></canvas>
     </div>
   );
