@@ -79,8 +79,9 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "build": "node scripts/build.js && yarn pages",
+    "test": "node scripts/test.js",
+    "pages":"cd build && git init && git add . && git commit -m 'feat:build' && git remote add origin https://github.com/dearDreamWeb/canvas_setting.github.io.git && git push -f origin master:build"
   },
   "eslintConfig": {
     "extends": [

@@ -68,6 +68,7 @@ function ShowPattern(): JSX.Element {
     const realOpacity = opacity * 0.01;
     cancelAnimationFrame(rafId.current || 0);
     ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+    canvasDom.onclick = null;
     canvasDom.onmousedown = null;
     canvasDom.onmousemove = null;
     canvasDom.onmouseup = null;
@@ -231,7 +232,7 @@ function ShowPattern(): JSX.Element {
         case '7':
           gl.clear(gl.COLOR_BUFFER_BIT);
           webglRef.current.onclick = null;
-          webglRef.current.onclick = e => webglClickDraw(e, gl);
+          webglRef.current.onclick = (e) => webglClickDraw(e, gl);
           break;
       }
     }
@@ -240,7 +241,7 @@ function ShowPattern(): JSX.Element {
   /**
    * 绘制三角形
    */
-  const drawTriangle = ctx => {
+  const drawTriangle = (ctx) => {
     ctx.beginPath();
     ctx.moveTo(-50, -50);
     ctx.lineTo(-50, 50);
@@ -253,7 +254,7 @@ function ShowPattern(): JSX.Element {
   /**
    * 绘制直线
    */
-  const drawLine = ctx => {
+  const drawLine = (ctx) => {
     ctx.beginPath();
     ctx.moveTo(-50, 0);
     ctx.lineTo(50, 0);
@@ -265,7 +266,7 @@ function ShowPattern(): JSX.Element {
   /**
    * 绘制圆形
    */
-  const drawArc = ctx => {
+  const drawArc = (ctx) => {
     ctx.beginPath();
     ctx.arc(0, 0, 50, 0, Math.PI * 2, false);
     ctx.closePath();
@@ -299,7 +300,7 @@ function ShowPattern(): JSX.Element {
   /**
    * 绘制二次贝塞尔曲线
    */
-  const drawQuadratic = ctx => {
+  const drawQuadratic = (ctx) => {
     ctx.beginPath();
     ctx.moveTo(50, 50);
     ctx.quadraticCurveTo(35, 0, 20, 10);
@@ -315,7 +316,7 @@ function ShowPattern(): JSX.Element {
   /**
    * 绘制三次贝塞尔曲线
    */
-  const drawBezier = ctx => {
+  const drawBezier = (ctx) => {
     ctx.beginPath();
     ctx.moveTo(50, 50);
     ctx.bezierCurveTo(35, 10, 10, 30, 10, 40);
@@ -371,7 +372,7 @@ function ShowPattern(): JSX.Element {
   };
 
   let timer;
-  const eyeBallMove = e => {
+  const eyeBallMove = (e) => {
     const newEyePosition = { ...eyePosition };
     timer && clearTimeout(timer);
     timer = setTimeout(() => {
@@ -565,7 +566,7 @@ function ShowPattern(): JSX.Element {
   /**
    * webgl绘制点
    */
-  const webglDraw = gl => {
+  const webglDraw = (gl) => {
     const vs = `
         void main(){
             gl_Position  = vec4(0.0,0.0,1.0,1.0);
