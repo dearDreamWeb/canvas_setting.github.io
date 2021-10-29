@@ -141,6 +141,7 @@ function optionTab(ctx: CanvasRenderingContext2D, clickIndex: number) {
       itemW
     );
   } else {
+    ctx.fillStyle = '#000';
     ctx.strokeRect(
       TEXTX,
       TEXTHEIGHT * (optionObj.countArr.length + 1.3),
