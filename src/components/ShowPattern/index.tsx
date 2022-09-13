@@ -653,6 +653,7 @@ function ShowPattern(): JSX.Element {
         className={styles.webgl_canvas}
         style={{ display: showCanvas ? 'none' : 'block' }}
       ></canvas>
+      {state.drawType ==='0' &&<div className={styles.showPattern_tips}>矩形工具只有配置项中的旋转可以生效，点击绘制的矩形即可进行旋转缩放</div>}
     </div>
   );
 }
