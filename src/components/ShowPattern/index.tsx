@@ -5,6 +5,7 @@ import { ContextData } from '../../globalState';
 import drawRect from '../draw/drawRect';
 import drawTree from '../drawTree/drawTree';
 import performanceTest from './drawUtils/performanceTest';
+import filter from '../filter';
 
 function ShowPattern(): JSX.Element {
   const canvasWrapRef = useRef<any>(null);
@@ -152,6 +153,9 @@ function ShowPattern(): JSX.Element {
         performanceTest(ctx, canvasDom, ({ newRafId }) => {
           rafId.current = newRafId;
         });
+        break;
+      case '13':
+        filter(ctx, canvasDom);
         break;
       default:
         pointsArr = [];

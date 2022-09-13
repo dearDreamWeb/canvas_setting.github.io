@@ -57,6 +57,10 @@ const menuList = [
     key: "12",
     text: "性能检测",
   },
+  {
+    key: "13",
+    text: "滤镜",
+  },
 ];
 
 function App(): JSX.Element {
